@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>You are an idiot!</title>
+<script src="you.js"></script>
+<style>
+* { margin: 0; padding: 0; }
+body { overflow: hidden; background: #ffffff; }
+#container {
+    width: 100vw; height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    animation: strobe 0.3s infinite;
+}
+@keyframes strobe {
+    0%   { background: #ff0000; }
+    25%  { background: #00ff00; }
+    50%  { background: #0000ff; }
+    75%  { background: #ffff00; }
+    100% { background: #ff0000; }
+}
+h2 {
+    font-size: 5vw;
+    color: #000;
+    text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff;
+    animation: flashText 0.5s infinite;
+}
+@keyframes flashText {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+</style>
+</head>
+<body onload="flagRun=1;playBall();return true;" onunload="procreate()">
+
+<div id="container">
+    <h2>YOU ARE AN IDIOT</h2>
+</div>
+
+</body>
+</html>
