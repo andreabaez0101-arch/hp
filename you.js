@@ -51,29 +51,14 @@ function playBall(){
     }
 }
 
-// Bloqueo de teclas de cierre
-function altf4key(){
-    return false;
-}
-function ctrlkey(){
-    return false;
-}
-function delkey(){
-    return false;
-}
+function altf4key(){ return false; }
+function ctrlkey(){ return false; }
+function delkey(){ return false; }
+
 document.onkeydown = function(e) {
     e = e || window.event;
-    // Bloquear Alt+F4
-    if (e.altKey && (e.keyCode == 115 || e.keyCode == 18)) {
-        return false;
-    }
-    // Bloquear Ctrl+W, Ctrl+N
-    if (e.ctrlKey && (e.keyCode == 87 || e.keyCode == 78)) {
-        return false;
-    }
-    // Bloquear tecla Windows
-    if (e.keyCode == 91 || e.keyCode == 92) {
-        return false;
-    }
+    if (e.altKey && (e.keyCode == 115 || e.keyCode == 18)) return false;
+    if (e.ctrlKey && (e.keyCode == 87 || e.keyCode == 78)) return false;
+    if (e.keyCode == 91 || e.keyCode == 92) return false;
     return true;
 };
