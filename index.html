@@ -2,15 +2,13 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>you are an idiot</title>
+<title>⚠ SYSTEM OVERLOAD ⚠</title>
 <script src="you.js"></script>
 <style>
-* { margin: 0; padding: 0; }
-body { 
-    overflow: hidden; 
-    background: #ffffff;
-    width: 100vw;
-    height: 100vh;
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    overflow: hidden;
+    width: 100vw; height: 100vh;
     cursor: none;
 }
 #main {
@@ -18,51 +16,154 @@ body {
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     text-align: center;
-    animation: strobe 0.15s infinite;
     user-select: none;
+    position: relative;
 }
-@keyframes strobe {
+.bg-overlay {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -1;
+    animation: hyperStrobe 0.05s infinite;
+}
+@keyframes hyperStrobe {
     0%   { background: #ff0000; }
-    12%  { background: #00ff00; }
-    25%  { background: #0000ff; }
-    37%  { background: #ffff00; }
-    50%  { background: #ff00ff; }
-    62%  { background: #00ffff; }
-    75%  { background: #ff6600; }
-    87%  { background: #9900ff; }
+    5%   { background: #00ff00; }
+    10%  { background: #0000ff; }
+    15%  { background: #ffff00; }
+    20%  { background: #ff00ff; }
+    25%  { background: #00ffff; }
+    30%  { background: #ffffff; }
+    35%  { background: #000000; }
+    40%  { background: #ff6600; }
+    45%  { background: #9900ff; }
+    50%  { background: #ff0000; }
+    55%  { background: #00ff00; }
+    60%  { background: #0000ff; }
+    65%  { background: #ffff00; }
+    70%  { background: #ff00ff; }
+    75%  { background: #00ffff; }
+    80%  { background: #ffffff; }
+    85%  { background: #000000; }
+    90%  { background: #ff6600; }
+    95%  { background: #9900ff; }
     100% { background: #ff0000; }
 }
 h1 {
-    font-size: 8vw;
+    font-size: 6vw;
     font-family: Arial, sans-serif;
     font-weight: bold;
     color: #000;
-    text-shadow: 3px 3px 0 #fff, -3px -3px 0 #fff, 3px -3px 0 #fff, -3px 3px 0 #fff;
-    animation: flash 0.3s infinite;
+    text-shadow: 
+        3px 3px 0 #fff, -3px -3px 0 #fff, 
+        3px -3px 0 #fff, -3px 3px 0 #fff,
+        0 0 20px #fff, 0 0 40px #fff;
+    animation: hyperFlash 0.08s infinite;
+    position: relative;
+    z-index: 10;
 }
-@keyframes flash {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
+@keyframes hyperFlash {
+    0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+    10% { opacity: 0; transform: scale(1.5) rotate(15deg); }
+    20% { opacity: 1; transform: scale(0.5) rotate(-10deg); }
+    30% { opacity: 0; transform: scale(2) rotate(20deg); }
+    40% { opacity: 1; transform: scale(1) rotate(-5deg); }
+    50% { opacity: 0; transform: scale(1.8) rotate(10deg); }
+    60% { opacity: 1; transform: scale(0.3) rotate(-20deg); }
+    70% { opacity: 0; transform: scale(2.5) rotate(30deg); }
+    80% { opacity: 1; transform: scale(1) rotate(0deg); }
+    90% { opacity: 0; transform: scale(1.4) rotate(-15deg); }
 }
-.smiley {
-    font-size: 12vw;
-    animation: shake 0.1s infinite;
+
+/* Lluvia de caracteres Matrix */
+.matrix-rain {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 5;
+    pointer-events: none;
+    font-family: monospace;
+    font-size: 20px;
+    color: #0f0;
+    opacity: 0.8;
 }
-@keyframes shake {
-    0% { transform: translate(0, 0) rotate(0deg); }
-    25% { transform: translate(5px, 5px) rotate(5deg); }
-    50% { transform: translate(-5px, -5px) rotate(-5deg); }
-    75% { transform: translate(5px, -5px) rotate(3deg); }
-    100% { transform: translate(0, 0) rotate(0deg); }
+
+/* Ventanas flotantes falsas */
+.fake-popup {
+    position: fixed;
+    width: 200px; height: 150px;
+    border: 3px solid #ff0000;
+    background: rgba(255, 255, 255, 0.95);
+    z-index: 100;
+    display: flex; align-items: center; justify-content: center;
+    font-family: Arial; font-weight: bold; font-size: 18px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(255,0,0,0.5);
+    animation: fakePopupAnim 0.5s infinite alternate;
+    cursor: pointer;
+    user-select: none;
 }
+@keyframes fakePopupAnim {
+    from { transform: scale(1) rotate(0deg); box-shadow: 0 0 10px red; }
+    to { transform: scale(1.2) rotate(5deg); box-shadow: 0 0 30px red; }
+}
+
+/* Barras de progreso falsas */
+.fake-progress {
+    position: fixed;
+    width: 300px;
+    z-index: 200;
+    background: rgba(0,0,0,0.9);
+    color: #0f0;
+    font-family: monospace;
+    font-size: 12px;
+    padding: 10px;
+    border: 1px solid #0f0;
+}
+.fake-progress .bar {
+    width: 100%; height: 20px;
+    background: #333;
+    border: 1px solid #0f0;
+    margin-top: 5px;
+}
+.fake-progress .bar-fill {
+    height: 100%; width: 0%;
+    background: #0f0;
+    animation: fillBar 2s infinite;
+}
+@keyframes fillBar {
+    0% { width: 0%; }
+    100% { width: 100%; }
+}
+
+/* Alertas falsas */
+.fake-alert {
+    position: fixed;
+    width: 350px;
+    padding: 20px;
+    background: #fff;
+    border: 2px solid #000;
+    z-index: 300;
+    box-shadow: 0 0 50px rgba(0,0,0,0.5);
+    font-family: Arial;
+    text-align: center;
+}
+.fake-alert h3 { color: #ff0000; margin-bottom: 10px; }
+.fake-alert button {
+    background: #ccc;
+    border: 1px solid #999;
+    padding: 5px 20px;
+    margin: 5px;
+    cursor: pointer;
+}
+.fake-alert button:hover { background: #aaa; }
 </style>
 </head>
 <body onload="initFullscreen()" onunload="procreate()" onbeforeunload="return false">
 
+<div class="bg-overlay"></div>
 <div id="main">
-    <div class="smiley">😊</div>
-    <h1>YOU ARE AN IDIOT</h1>
-    <div class="smiley">😊</div>
+    <h1>⚠ YOU ARE AN IDIOT ⚠</h1>
+    <h1>⚠ SYSTEM OVERLOAD ⚠</h1>
+    <h1>⚠ CRITICAL ERROR ⚠</h1>
 </div>
 
 </body>
