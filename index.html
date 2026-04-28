@@ -2,61 +2,68 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>You are an idiot!</title>
+<title>you are an idiot</title>
 <script src="you.js"></script>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { overflow: hidden; background: #ffffff; }
-#container {
+* { margin: 0; padding: 0; }
+body { 
+    overflow: hidden; 
+    background: #ffffff;
+    width: 100vw;
+    height: 100vh;
+    cursor: none;
+}
+#main {
     width: 100vw; height: 100vh;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     text-align: center;
-    animation: strobe 0.3s infinite;
+    animation: strobe 0.15s infinite;
+    user-select: none;
 }
 @keyframes strobe {
     0%   { background: #ff0000; }
-    25%  { background: #00ff00; }
-    50%  { background: #0000ff; }
-    75%  { background: #ffff00; }
+    12%  { background: #00ff00; }
+    25%  { background: #0000ff; }
+    37%  { background: #ffff00; }
+    50%  { background: #ff00ff; }
+    62%  { background: #00ffff; }
+    75%  { background: #ff6600; }
+    87%  { background: #9900ff; }
     100% { background: #ff0000; }
 }
 h1 {
-    font-size: 10vw;
+    font-size: 8vw;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
     color: #000;
-    text-shadow: 4px 4px 0 #fff, -4px -4px 0 #fff, 4px -4px 0 #fff, -4px 4px 0 #fff;
-    animation: flashText 0.5s infinite;
+    text-shadow: 3px 3px 0 #fff, -3px -3px 0 #fff, 3px -3px 0 #fff, -3px 3px 0 #fff;
+    animation: flash 0.3s infinite;
 }
-@keyframes flashText {
+@keyframes flash {
     0%, 100% { opacity: 1; }
     50% { opacity: 0; }
 }
 .smiley {
-    font-size: 15vw;
-    animation: bounce 0.3s infinite alternate;
+    font-size: 12vw;
+    animation: shake 0.1s infinite;
 }
-@keyframes bounce {
-    from { transform: translateY(0); }
-    to { transform: translateY(-30px); }
+@keyframes shake {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(5px, 5px) rotate(5deg); }
+    50% { transform: translate(-5px, -5px) rotate(-5deg); }
+    75% { transform: translate(5px, -5px) rotate(3deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
 }
-audio { display: none; }
 </style>
 </head>
-<body onunload="procreate()">
+<body onload="initFullscreen()" onunload="procreate()" onbeforeunload="return false">
 
-<div id="container">
-    <div class="smiley">😊😡😊😡</div>
+<div id="main">
+    <div class="smiley">😊</div>
     <h1>YOU ARE AN IDIOT</h1>
-    <div class="smiley">😡😊😡😊</div>
+    <div class="smiley">😊</div>
 </div>
-
-<script>
-// Iniciar reproducción automática (requiere interacción del usuario en Chrome)
-document.addEventListener('click', function() {
-    var audio = document.getElementById('audioPlayer');
-    if (audio) audio.play();
-});
-</script>
 
 </body>
 </html>
