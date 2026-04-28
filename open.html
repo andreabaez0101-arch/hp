@@ -2,40 +2,51 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>You are an idiot!</title>
+<title>you are an idiot</title>
 <script src="you.js"></script>
 <style>
 * { margin: 0; padding: 0; }
-body { overflow: hidden; background: #ffffff; }
-#container {
+body { 
+    overflow: hidden; 
+    background: #ffffff;
+    width: 100vw; height: 100vh;
+}
+#main {
     width: 100vw; height: 100vh;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     text-align: center;
-    animation: strobe 0.3s infinite;
+    animation: strobe 0.15s infinite;
+    user-select: none;
 }
 @keyframes strobe {
     0%   { background: #ff0000; }
-    25%  { background: #00ff00; }
-    50%  { background: #0000ff; }
-    75%  { background: #ffff00; }
+    12%  { background: #00ff00; }
+    25%  { background: #0000ff; }
+    37%  { background: #ffff00; }
+    50%  { background: #ff00ff; }
+    62%  { background: #00ffff; }
+    75%  { background: #ff6600; }
+    87%  { background: #9900ff; }
     100% { background: #ff0000; }
 }
 h2 {
     font-size: 5vw;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
     color: #000;
     text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff;
-    animation: flashText 0.5s infinite;
+    animation: flash 0.3s infinite;
 }
-@keyframes flashText {
+@keyframes flash {
     0%, 100% { opacity: 1; }
     50% { opacity: 0; }
 }
 </style>
 </head>
-<body onload="flagRun=1;playBall();return true;" onunload="procreate()">
+<body onload="flagRun=1;playBall();return true;" onunload="procreate()" onbeforeunload="return false">
 
-<div id="container">
+<div id="main">
     <h2>YOU ARE AN IDIOT</h2>
 </div>
 
