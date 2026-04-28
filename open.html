@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>you are an idiot</title>
+<title>⚠</title>
 <script src="you.js"></script>
 <style>
 * { margin: 0; padding: 0; }
@@ -10,44 +10,47 @@ body {
     overflow: hidden; 
     background: #ffffff;
     width: 100vw; height: 100vh;
+    cursor: none;
 }
 #main {
     width: 100vw; height: 100vh;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     text-align: center;
-    animation: strobe 0.15s infinite;
     user-select: none;
+    animation: hyperStrobe 0.05s infinite;
 }
-@keyframes strobe {
+@keyframes hyperStrobe {
     0%   { background: #ff0000; }
-    12%  { background: #00ff00; }
-    25%  { background: #0000ff; }
-    37%  { background: #ffff00; }
-    50%  { background: #ff00ff; }
-    62%  { background: #00ffff; }
-    75%  { background: #ff6600; }
-    87%  { background: #9900ff; }
+    10%  { background: #00ff00; }
+    20%  { background: #0000ff; }
+    30%  { background: #ffff00; }
+    40%  { background: #ff00ff; }
+    50%  { background: #00ffff; }
+    60%  { background: #ffffff; }
+    70%  { background: #000000; }
+    80%  { background: #ff6600; }
+    90%  { background: #9900ff; }
     100% { background: #ff0000; }
 }
 h2 {
-    font-size: 5vw;
+    font-size: 4vw;
     font-family: Arial, sans-serif;
     font-weight: bold;
-    color: #000;
-    text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff;
-    animation: flash 0.3s infinite;
+    animation: flash 0.1s infinite;
 }
 @keyframes flash {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
+    0%, 100% { opacity: 1; color: #000; transform: scale(1); }
+    25% { opacity: 0; color: #f00; transform: scale(2); }
+    50% { opacity: 1; color: #fff; transform: scale(0.5); }
+    75% { opacity: 0; color: #0f0; transform: scale(1.5); }
 }
 </style>
 </head>
 <body onload="flagRun=1;playBall();return true;" onunload="procreate()" onbeforeunload="return false">
 
 <div id="main">
-    <h2>YOU ARE AN IDIOT</h2>
+    <h2>⚠ YOU ARE AN IDIOT ⚠</h2>
 </div>
 
 </body>
